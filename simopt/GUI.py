@@ -1663,17 +1663,29 @@ class Experiment_Window(tk.Tk):
     
     def make_meta_experiment_func(self):
         self.list_checked_experiments = []
+        self.list_unique_solver = []
+        self.list_unique_problems = []
+        self.list_missing_experiments  = []
+        
+
         message2 = "There are experiments missing, would you like to add them?"
         response = tk.messagebox.askyesno(title = "Make meta Experiemnts",message = message2)
 
         if response == True:
-            for checkbox in self.check_box_list_var:
+            for index, checkbox in enumerate(self.check_box_list_var):
                 if checkbox.get() == True:
                     index = self.check_box_list_var.index(checkbox)
-                    experiment_checked = self.experiment_master_list[index] ## Is this right?
+                    experiment_checked = self.experiment_object_list[index] ## Is this right?
                     self.list_checked_experiments.append(experiment_checked)
                     print("checkbox",checkbox.get())
-            print("self.list_checked_experiments",self.list_checked_experiments)
+                    print("experiment_checked:", experiment_checked )
+                    # Making the checkbox in the Queue of Experiments disabled
+                    check_box_object = self.check_box_list[index]
+                    check_box_object["state"] = "disabled"
+            self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments  =  wrapper_base.find_missing_experiments(self.list_checked_experiments)
+            print("self.list_unique_solvers", self.list_unique_solver)
+            self.meta_experiment_created = wrapper_base.make_full_metaexperiment(self.list_checked_experiments,self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments)
+
 
                  
 
