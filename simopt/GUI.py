@@ -1683,9 +1683,8 @@ class Experiment_Window(tk.Tk):
                     check_box_object = self.check_box_list[index]
                     check_box_object["state"] = "disabled"
             self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments  =  wrapper_base.find_missing_experiments(self.list_checked_experiments)
-            print("self.list_unique_solvers", self.list_unique_solver)
             self.meta_experiment_created = wrapper_base.make_full_metaexperiment(self.list_checked_experiments,self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments)
-
+            
 
                  
 
