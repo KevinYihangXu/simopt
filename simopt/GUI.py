@@ -1485,11 +1485,27 @@ class Experiment_Window(tk.Tk):
         self.crossdesign_window.title("Cross-Design Experiments")
         self.cross_app = Cross_Design_Window(self.crossdesign_window, self)
 
-    def add_meta_exp_to_frame(self,n_macroreps):
-
-        self.meta_experiment_macro_reps.append(int(n_macroreps.get()))
+    def add_meta_exp_to_frame(self, n_macroreps=None, input_meta_experiment=None):
+        print("n_macroreps", n_macroreps)
+        print("input_meta_experiment", input_meta_experiment)
+        if n_macroreps == None and input_meta_experiment != None:
+            self.cross_app = Cross_Design_Window(master = None, main_widow = None, forced_creation = True)
+            self.cross_app.crossdesign_MetaExperiment = input_meta_experiment
+            self.meta_experiment_macro_reps.append("mixed")
+            text_macros_added = "mixed"
+        elif n_macroreps != None and input_meta_experiment == None:
+            self.meta_experiment_macro_reps.append(int(n_macroreps.get()))
+            text_macros_added = n_macroreps.get()
 
         row_num = self.count_meta_experiment_queue + 1
+
+        self.macros_added = tk.Label(master=self.tab_two,
+                                        text= text_macros_added,
+                                        font = "Calibri 12",
+                                        justify="center")
+        self.macros_added.grid(row=row_num, column=2, sticky='nsew', padx=10, pady=3)
+
+        
         self.problem_added = tk.Label(master=self.tab_two,
                                                     text=self.cross_app.crossdesign_MetaExperiment.problem_names,
                                                     font = "Calibri 12",
@@ -1502,11 +1518,7 @@ class Experiment_Window(tk.Tk):
                                         justify="center")
         self.solver_added.grid(row=row_num, column=1, sticky='nsew', padx=10, pady=3)
 
-        self.macros_added = tk.Label(master=self.tab_two,
-                                        text= n_macroreps.get(),
-                                        font = "Calibri 12",
-                                        justify="center")
-        self.macros_added.grid(row=row_num, column=2, sticky='nsew', padx=10, pady=3)
+        
 
         self.run_button_added = ttk.Button(master=self.tab_two,
                                             text="Run" ,
@@ -1685,120 +1697,124 @@ class Experiment_Window(tk.Tk):
             self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments  =  wrapper_base.find_missing_experiments(self.list_checked_experiments)
             self.meta_experiment_created = wrapper_base.make_full_metaexperiment(self.list_checked_experiments,self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments)
             
+            self.add_meta_exp_to_frame(n_macroreps = None, input_meta_experiment=self.meta_experiment_created)
 
                  
 
 class Cross_Design_Window():
-    def __init__(self, master, main_widow):
 
-        self.master = master
-        self.main_window = main_widow
+    def __init__(self, master, main_widow, forced_creation = False):
+        if not forced_creation:
+            self.master = master
+            self.main_window = main_widow
 
-        self.crossdesign_title_label = tk.Label(master=self.master,
-                                                text = "Create Cross-Design Experiments",
-                                                font = "Calibri 13 bold")
-        self.crossdesign_title_label.place(x=10, y=25)
+            self.crossdesign_title_label = tk.Label(master=self.master,
+                                                    text = "Create Cross-Design Experiments",
+                                                    font = "Calibri 13 bold")
+            self.crossdesign_title_label.place(x=10, y=25)
 
-        self.crossdesign_problem_label = tk.Label(master=self.master,
-                                                    text = "Select Problems:",
-                                                    font = "Calibri 13")
-        self.crossdesign_problem_label.place(x=145, y=55)
+            self.crossdesign_problem_label = tk.Label(master=self.master,
+                                                        text = "Select Problems:",
+                                                        font = "Calibri 13")
+            self.crossdesign_problem_label.place(x=145, y=55)
 
-        self.crossdesign_solver_label = tk.Label(master=self.master,
-                                                    text = "Select Solvers:",
-                                                    font = "Calibri 13")
-        self.crossdesign_solver_label.place(x=10, y=55)
+            self.crossdesign_solver_label = tk.Label(master=self.master,
+                                                        text = "Select Solvers:",
+                                                        font = "Calibri 13")
+            self.crossdesign_solver_label.place(x=10, y=55)
 
-        self.crossdesign_checkbox_problem_list = []
-        self.crossdesign_checkbox_problem_names = []
-        self.crossdesign_checkbox_solver_list = []
-        self.crossdesign_checkbox_solver_names = []
+            self.crossdesign_checkbox_problem_list = []
+            self.crossdesign_checkbox_problem_names = []
+            self.crossdesign_checkbox_solver_list = []
+            self.crossdesign_checkbox_solver_names = []
 
-        solver_cnt = 0
-        
-        for solver in solver_nonabbreviated_directory:
-            self.crossdesign_solver_checkbox_var = tk.BooleanVar(self.master, value=False)
-            self.crossdesign_solver_checkbox = tk.Checkbutton(master=self.master,
-                                                            text = solver,
-                                                            variable = self.crossdesign_solver_checkbox_var)
-            self.crossdesign_solver_checkbox.place(x=10, y=85+(25*solver_cnt))
+            solver_cnt = 0
+            
+            for solver in solver_nonabbreviated_directory:
+                self.crossdesign_solver_checkbox_var = tk.BooleanVar(self.master, value=False)
+                self.crossdesign_solver_checkbox = tk.Checkbutton(master=self.master,
+                                                                text = solver,
+                                                                variable = self.crossdesign_solver_checkbox_var)
+                self.crossdesign_solver_checkbox.place(x=10, y=85+(25*solver_cnt))
 
-            self.crossdesign_checkbox_solver_list.append(self.crossdesign_solver_checkbox_var)
-            self.crossdesign_checkbox_solver_names.append(solver)
+                self.crossdesign_checkbox_solver_list.append(self.crossdesign_solver_checkbox_var)
+                self.crossdesign_checkbox_solver_names.append(solver)
 
-            solver_cnt += 1
+                solver_cnt += 1
 
-        problem_cnt = 0
-        for problem in problem_nonabbreviated_directory:
-            self.crossdesign_problem_checkbox_var = tk.BooleanVar(self.master, value=False)
-            self.crossdesign_problem_checkbox = tk.Checkbutton(master=self.master,
-                                                text = problem,
-                                                variable = self.crossdesign_problem_checkbox_var)
-            self.crossdesign_problem_checkbox.place(x=145, y=85+(25*problem_cnt))
+            problem_cnt = 0
+            for problem in problem_nonabbreviated_directory:
+                self.crossdesign_problem_checkbox_var = tk.BooleanVar(self.master, value=False)
+                self.crossdesign_problem_checkbox = tk.Checkbutton(master=self.master,
+                                                    text = problem,
+                                                    variable = self.crossdesign_problem_checkbox_var)
+                self.crossdesign_problem_checkbox.place(x=145, y=85+(25*problem_cnt))
 
-            self.crossdesign_checkbox_problem_list.append(self.crossdesign_problem_checkbox_var)
-            self.crossdesign_checkbox_problem_names.append(problem)
+                self.crossdesign_checkbox_problem_list.append(self.crossdesign_problem_checkbox_var)
+                self.crossdesign_checkbox_problem_names.append(problem)
 
-            problem_cnt += 1
+                problem_cnt += 1
 
-        
+            
 
-        if problem_cnt < solver_cnt:
-            solver_cnt += 1
-            self.crossdesign_macro_label = tk.Label(master=self.master,
-                                                    text = "Number of Macroreplications:",
-                                                    font = "Calibri 13")
-            self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
+            if problem_cnt < solver_cnt:
+                solver_cnt += 1
+                self.crossdesign_macro_label = tk.Label(master=self.master,
+                                                        text = "Number of Macroreplications:",
+                                                        font = "Calibri 13")
+                self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
 
-            self.crossdesign_macro_var = tk.StringVar(self.master)
-            self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
-            self.crossdesign_macro_entry.insert(index=tk.END, string="10")
-            self.crossdesign_macro_entry.place(x=15, y=105+(25*solver_cnt))
+                self.crossdesign_macro_var = tk.StringVar(self.master)
+                self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
+                self.crossdesign_macro_entry.insert(index=tk.END, string="10")
+                self.crossdesign_macro_entry.place(x=15, y=105+(25*solver_cnt))
 
-            self.crossdesign_button = ttk.Button(master=self.master,
-                                            text = "Add Cross-Design Experiments",
-                                            width = 30,
-                                            command = self.confirm_cross_design_function)
-            self.crossdesign_button.place(x=15, y=135+(25*solver_cnt))
+                self.crossdesign_button = ttk.Button(master=self.master,
+                                                text = "Add Cross-Design Experiments",
+                                                width = 30,
+                                                command = self.confirm_cross_design_function)
+                self.crossdesign_button.place(x=15, y=135+(25*solver_cnt))
 
-        if problem_cnt > solver_cnt:
-            problem_cnt += 1
+            if problem_cnt > solver_cnt:
+                problem_cnt += 1
 
-            self.crossdesign_macro_label = tk.Label(master=self.master,
-                                                    text = "Number of Macroreplications:",
-                                                    font = "Calibri 13")
-            self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
+                self.crossdesign_macro_label = tk.Label(master=self.master,
+                                                        text = "Number of Macroreplications:",
+                                                        font = "Calibri 13")
+                self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
 
-            self.crossdesign_macro_var = tk.StringVar(self.master)
-            self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
-            self.crossdesign_macro_entry.insert(index=tk.END, string="10")
+                self.crossdesign_macro_var = tk.StringVar(self.master)
+                self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
+                self.crossdesign_macro_entry.insert(index=tk.END, string="10")
 
-            self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
+                self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
 
-            self.crossdesign_button = ttk.Button(master=self.master,
-                                            text = "Add Cross-Design Experiments",
-                                            width = 30,
-                                            command = self.confirm_cross_design_function)
-            self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
+                self.crossdesign_button = ttk.Button(master=self.master,
+                                                text = "Add Cross-Design Experiments",
+                                                width = 30,
+                                                command = self.confirm_cross_design_function)
+                self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
 
-        if problem_cnt == solver_cnt:
-            problem_cnt += 1
+            if problem_cnt == solver_cnt:
+                problem_cnt += 1
 
-            self.crossdesign_macro_label = tk.Label(master=self.master,
-                                                    text = "Number of Macroreplications:",
-                                                    font = "Calibri 13")
-            self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
+                self.crossdesign_macro_label = tk.Label(master=self.master,
+                                                        text = "Number of Macroreplications:",
+                                                        font = "Calibri 13")
+                self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
 
-            self.crossdesign_macro_var = tk.StringVar(self.master)
-            self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
-            self.crossdesign_macro_entry.insert(index=tk.END, string="10")
-            self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
+                self.crossdesign_macro_var = tk.StringVar(self.master)
+                self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
+                self.crossdesign_macro_entry.insert(index=tk.END, string="10")
+                self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
 
-            self.crossdesign_button = ttk.Button(master=self.master,
-                                            text = "Add Cross-Design Experiments",
-                                            width = 30,
-                                            command = self.confirm_cross_design_function)
-            self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
+                self.crossdesign_button = ttk.Button(master=self.master,
+                                                text = "Add Cross-Design Experiments",
+                                                width = 30,
+                                                command = self.confirm_cross_design_function)
+                self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
+            else:
+                print("forced creation of cross design window class")
 
     def confirm_cross_design_function(self):
         solver_names_list = list(solver_directory.keys())
@@ -2687,7 +2703,7 @@ class Plot_Window():
                 # self.view_plot.pack()
                 self.changeOnHover(self.view_plot, "red", "yellow")
                 self.all_path_names.append(new_plot)
-
+                print("all_path_names",self.all_path_names)
                 self.num_plots += 1
 
         def changeOnHover(self, button, colorOnHover, colorOnLeave):
