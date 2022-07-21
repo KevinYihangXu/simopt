@@ -335,7 +335,7 @@ class ChessAvgDifference(Problem):
     def response_dict_to_stoch_constraints(self, response_dict):
         """
         Convert a dictionary with response keys to a vector
-        of left-hand sides of stochastic constraints: E[Y] >= 0
+        of left-hand sides of stochastic constraints: E[Y] <= 0
 
         Arguments
         ---------
@@ -347,7 +347,7 @@ class ChessAvgDifference(Problem):
         stoch_constraints : tuple
             vector of LHSs of stochastic constraint
         """
-        stoch_constraints = (-1 * response_dict["avg_wait_time"],)
+        stoch_constraints = (response_dict["avg_wait_time"],)
         return stoch_constraints
 
     def deterministic_stochastic_constraints_and_gradients(self, x):
@@ -366,7 +366,7 @@ class ChessAvgDifference(Problem):
         det_stoch_constraints_gradients : tuple
             vector of gradients of deterministic components of stochastic constraints
         """
-        det_stoch_constraints = (self.factors["upper_time"],)
+        det_stoch_constraints = (-1 * self.factors["upper_time"],)
         det_stoch_constraints_gradients = ((0,),)
         return det_stoch_constraints, det_stoch_constraints_gradients
 
