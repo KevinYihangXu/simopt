@@ -32,7 +32,7 @@ from models.chessmm import ChessMatchmaking, ChessAvgDifference
 from models.san import SAN, SANLongestPath
 from models.hotel import Hotel, HotelRevenue
 from models.tableallocation import TableAllocation, TableAllocationMaxRev
-from models.paramesti import ParameterEstimation, ParamEstiMinLogLik
+from models.paramesti import ParameterEstimation #, ParamEstiMaxLogLik
 from models.fixedsan import FixedSAN, FixedSANLongestPath
 from models.voting import Voting, MinVotingMaxWaitTime
 from models.prodsys import ProdSys, ProdSysMinLeadTime
@@ -64,7 +64,7 @@ problem_directory = {
     "SAN-1": SANLongestPath,
     "HOTEL-1": HotelRevenue,
     "TABLEALLOCATION-1": TableAllocationMaxRev,
-    "PARAMESTI-1": ParamEstiMinLogLik,
+    #"PARAMESTI-1": ParamEstiMaxLogLik,
     "FIXEDSAN-1": FixedSANLongestPath,
     "VOTING-1": MinVotingMaxWaitTime,
     "PRODSYS-1": ProdSysMinLeadTime
@@ -85,7 +85,7 @@ problem_nonabbreviated_directory = {
     "Min Mean Longest Path for Stochastic Activity Network (SBCN)": SANLongestPath,
     "Max Revenue for Hotel Booking (SBDN)": HotelRevenue,
     "Max Revenue for Restaurant Table Allocation (SDDN)": TableAllocationMaxRev,
-    "Max Log Likelihood for Gamma Parameter Estimation (SBCG)": ParamEstiMinLogLik,
+    #"Max Log Likelihood for Gamma Parameter Estimation (SBCG)": ParamEstiMaxLogLik,
     "Min Mean Longest Path for Fixed Stochastic Activity Network (SBCN)": FixedSANLongestPath,
     "Minimize Maximum Waiting Time for Voting System (SDDN)": MinVotingMaxWaitTime,
     "Minimize Lead Time for Production System (SSDN)": ProdSysMinLeadTime
