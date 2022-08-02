@@ -11,7 +11,9 @@ from PIL import ImageTk, Image
 from directory import problem_directory
 from directory import problem_nonabbreviated_directory
 from directory import solver_directory
+from directory import solver_nonabbreviated_directory
 from directory import model_directory
+from directory import model_unabbreviated_directory
 from experiment_base import Experiment, MetaExperiment
 import experiment_base
 import pickle
@@ -881,7 +883,7 @@ class Experiment_Window(tk.Tk):
 
             view_button_added = row_of_widgets[7]
             view_button_added["command"] = partial(self.view_meta_function,row_index+1)
-            row_of_widgets[6] = view_button_added
+            row_of_widgets[7] = view_button_added
 
 
             row_of_widgets[0].grid(row= (row_index+1), column=0, sticky='nsew', padx=10, pady=3)
@@ -1004,6 +1006,7 @@ class Experiment_Window(tk.Tk):
                 # self.selected[0] = self.problem_name
 
                 self.my_experiment = Experiment(solver_name=self.solver_name, problem_name=self.problem_name, solver_rename=self.solver_rename, problem_rename=self.problem_rename, solver_fixed_factors=self.solver_factors, problem_fixed_factors=self.problem_factors, model_fixed_factors=self.oracle_factors)
+                print("type", type(self.selected[2]))
                 self.my_experiment.n_macroreps = self.selected[2]
                 self.my_experiment.post_norm_ready = False
 
@@ -1432,7 +1435,9 @@ class Experiment_Window(tk.Tk):
         self.selected = self.experiment_master_list[row_index]
         self.macro_reps = self.selected[2]
 
+        print("type macro reps", type(self.macro_reps))
         self.my_experiment.run(n_macroreps=self.macro_reps)
+        
 
     def post_rep_function(self, integer):
         row_index = integer - 1
@@ -1676,7 +1681,7 @@ class Experiment_Window(tk.Tk):
         self.postrep_window.geometry("610x350")
         self.postrep_window.title("Post-Normalization Page")
         self.app = Post_Normal_Window(self.postrep_window, self.post_norm_exp_list, self)
-        # wrapper_base.post_normalize(self.post_norm_exp_list, n_postreps_init_opt, crn_across_init_opt=True, proxy_init_val=None, proxy_opt_val=None, proxy_opt_x=None)
+        # experiment_base.post_normalize(self.post_norm_exp_list, n_postreps_init_opt, crn_across_init_opt=True, proxy_init_val=None, proxy_opt_val=None, proxy_opt_x=None)
 
     def post_norm_return_func(self):
         #('IN post_process_disable_button ', self.post_rep_function_row_index)
@@ -1703,8 +1708,8 @@ class Experiment_Window(tk.Tk):
                     # Making the checkbox in the Queue of Experiments disabled
                     check_box_object = self.check_box_list[index]
                     check_box_object["state"] = "disabled"
-            self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments  =  wrapper_base.find_missing_experiments(self.list_checked_experiments)
-            self.meta_experiment_created = wrapper_base.make_full_metaexperiment(self.list_checked_experiments,self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments)
+            self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments  =  experiment_base.find_missing_experiments(self.list_checked_experiments)
+            self.meta_experiment_created = experiment_base.make_full_metaexperiment(self.list_checked_experiments,self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments)
             
             self.add_meta_exp_to_frame(n_macroreps = None, input_meta_experiment=self.meta_experiment_created)
             self.meta_experiment_problem_solver_list(self.meta_experiment_created)
@@ -1745,18 +1750,40 @@ class Experiment_Window(tk.Tk):
         self.solver_label2.place(relx=.01, rely=.1)
         self.solver_menu2.place(relx=.1, rely=.1 )
 
-        view_button_added = self.widget_list[row_index-1][7]
+        view_button_added = self.widget_meta_list[row_index-1][7]
         view_button_added["text"] = "Exit View Meta"
         view_button_added["command"] = partial(self.exit_meta_view, row_index)
         view_button_added.grid(row= (row_index), column=7, sticky='nsew', padx=10, pady=3)
 
     def exit_meta_view(self, row_index):
-        pass
+        self.problem_menu2.destroy()
+        self.problem_label2.destroy()
+        self.solver_menu2.destroy()
+        self.solver_label2.destroy()
+        self.factor_label_frame_solver.destroy()
+        self.factor_label_frame_oracle.destroy()
+        self.factor_label_frame_problem.destroy()
+        self.problem_label = tk.Label(master=self.master, # window label is used in
+                        text = "Select Problem:",
+                        font = "Calibri 13")
+        self.problem_var = tk.StringVar(master=self.master)
+        self.problem_menu = ttk.OptionMenu(self.master, self.problem_var, "Problem", *self.problem_list, command=self.show_problem_factors)
+
+        self.problem_label.place(relx=.35, rely=.1)
+        self.problem_menu.place(relx=.45, rely=.1)
+        self.solver_label = tk.Label(master=self.master, # window label is used in
+                            text = "Select Solver(s):*",
+                            font = "Calibri 13")
+        self.solver_var = tk.StringVar(master=self.master)
+        self.solver_menu = ttk.OptionMenu(self.master, self.solver_var, "Solver", *self.solver_list, command=self.show_solver_factors)
+        
+        self.solver_label.place(relx=.01, rely=.1)
+        self.solver_menu.place(relx=.1, rely=.1 )
 
     def show_solver_factors2(self, *args):
         self.factor_label_frame_solver.destroy()
         self.factor_label_frame_oracle.destroy()
-
+        
         self.solver_factors_list = []
         self.solver_factors_types = []
 
@@ -1796,6 +1823,7 @@ class Experiment_Window(tk.Tk):
             label = tk.Label(master=self.factor_tab_one_solver, text=heading, font="Calibri 14 bold")
             label.grid(row=0, column=self.factor_heading_list_solver.index(heading), padx=10, pady=3)
 
+        
         self.solver_object = solver_directory[self.solver_var2.get()]
 
         count_factors_solver = 1
