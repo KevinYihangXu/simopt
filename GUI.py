@@ -14,7 +14,7 @@ from directory import solver_directory
 from directory import solver_nonabbreviated_directory
 from directory import model_directory
 from directory import model_unabbreviated_directory
-from experiment_base import Experiment, MetaExperiment
+from experiment_base import ProblemSolver, ProblemsSolvers
 import experiment_base
 import pickle
 from tkinter import Listbox
@@ -750,7 +750,7 @@ class Experiment_Window(tk.Tk):
                 temp_solver = solver_nonabbreviated_directory[self.solver_var.get()]
                 temp_solver_name = temp_solver().name
 
-                temp_experiment = Experiment(solver_name=temp_solver_name, problem_name=temp_problem_name)
+                temp_experiment = ProblemSolver(solver_name=temp_solver_name, problem_name=temp_problem_name)
                 comp = temp_experiment.check_compatibility()
 
                 if comp == "":
@@ -1005,7 +1005,7 @@ class Experiment_Window(tk.Tk):
 
                 # self.selected[0] = self.problem_name
 
-                self.my_experiment = Experiment(solver_name=self.solver_name, problem_name=self.problem_name, solver_rename=self.solver_rename, problem_rename=self.problem_rename, solver_fixed_factors=self.solver_factors, problem_fixed_factors=self.problem_factors, model_fixed_factors=self.oracle_factors)
+                self.my_experiment = ProblemSolver(solver_name=self.solver_name, problem_name=self.problem_name, solver_rename=self.solver_rename, problem_rename=self.problem_rename, solver_fixed_factors=self.solver_factors, problem_fixed_factors=self.problem_factors, model_fixed_factors=self.oracle_factors)
                 print("type", type(self.selected[2]))
                 self.my_experiment.n_macroreps = self.selected[2]
                 self.my_experiment.post_norm_ready = False
@@ -2500,8 +2500,8 @@ class Cross_Design_Window():
             return
         # macro_reps = self.crossdesign_macro_var.get()
         #(solver_list, problem_list)
-        # self.crossdesign_MetaExperiment = MetaExperiment(solver_names=solver_list, problem_names=problem_list, fixed_factors_filename="all_factors")
-        self.crossdesign_MetaExperiment = MetaExperiment(solver_names=solver_list, problem_names=problem_list)
+        # self.crossdesign_ProblemsSolvers = ProblemsSolvers(solver_names=solver_list, problem_names=problem_list, fixed_factors_filename="all_factors")
+        self.crossdesign_ProblemsSolvers = ProblemsSolvers(solver_names=solver_list, problem_names=problem_list)
 
         # if self.count_meta_experiment_queue == 0:
         #     self.create_meta_exp_frame()
