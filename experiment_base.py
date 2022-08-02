@@ -292,7 +292,7 @@ def max_difference_of_curves(curve1, curve2):
     return max_diff
 
 
-class Experiment(object):
+class ProblemSolver(object):
     """Base class for running one solver on one problem.
 
     Attributes
@@ -304,7 +304,7 @@ class Experiment(object):
     n_macroreps : int
         Number of macroreplications run.
     file_name_path : str
-        Path of .pickle file for saving ``experiment_base.Experiment`` object.
+        Path of .pickle file for saving ``experiment_base.ProblemSolver`` object.
     all_recommended_xs : list [list [tuple]]
         Sequences of recommended solutions from each macroreplication.
     all_intermediate_budgets : list [list]
@@ -363,10 +363,10 @@ class Experiment(object):
     model_fixed_factors : dict, optional
         Dictionary of user-specified model factors.
     file_name_path : str, optional
-        Path of .pickle file for saving ``experiment_base.Experiment`` objects.
+        Path of .pickle file for saving ``experiment_base.ProblemSolver`` objects.
     """
     def __init__(self, solver_name=None, problem_name=None, solver_rename=None, problem_rename=None, solver=None, problem=None, solver_fixed_factors=None, problem_fixed_factors=None, model_fixed_factors=None, file_name_path=None):
-        """There are two ways to create an Experiment object:
+        """There are two ways to create a ProblemSolver object:
             1. Provide the names of the solver and problem to look up in ``directory.py``.
             2. Provide the solver and problem objects to pair.
         """
@@ -478,7 +478,7 @@ class Experiment(object):
             # Record recommended solutions and intermediate budgets.
             self.all_recommended_xs.append([solution.x for solution in recommended_solns])
             self.all_intermediate_budgets.append(intermediate_budgets)
-        # Save Experiment object to .pickle file.
+        # Save ProblemSolver object to .pickle file.
         self.record_experiment_results()
 
     def check_run(self):
@@ -546,7 +546,7 @@ class Experiment(object):
                         rng.advance_substream()
         # Store estimated objective for each macrorep for each budget.
         self.all_est_objectives = [[np.mean(self.all_post_replicates[mrep][budget_index]) for budget_index in range(len(self.all_intermediate_budgets[mrep]))] for mrep in range(self.n_macroreps)]
-        # Save Experiment object to .pickle file.
+        # Save ProblemSolver object to .pickle file.
         self.record_experiment_results()
 
     def check_postreplicate(self):
@@ -739,7 +739,7 @@ class Experiment(object):
                 pass
 
     def record_experiment_results(self):
-        """Save ``experiment_base.Experiment`` object to .pickle file.
+        """Save ``experiment_base.ProblemSolver`` object to .pickle file.
         """
         with open(self.file_name_path, "wb") as file:
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
@@ -772,17 +772,17 @@ def trim_solver_results(problem, recommended_solns, intermediate_budgets):
 
 
 def read_experiment_results(file_name_path):
-    """Read in ``experiment_base.Experiment`` object from .pickle file.
+    """Read in ``experiment_base.ProblemSolver`` object from .pickle file.
 
     Parameters
     ----------
     file_name_path : str
-        Path of .pickle file for reading ``experiment_base.Experiment`` object.
+        Path of .pickle file for reading ``experiment_base.ProblemSolver`` object.
 
     Returns
     -------
-    experiment : ``experiment_base.Experiment``
-        Experiment that has been run or has been post-processed.
+    experiment : ``experiment_base.ProblemSolver``
+        Problem-solver pair that has been run or has been post-processed.
     """
     with open(file_name_path, "rb") as file:
         experiment = pickle.load(file)
@@ -795,8 +795,8 @@ def post_normalize(experiments, n_postreps_init_opt, crn_across_init_opt=True, p
 
     Parameters
     ----------
-    experiments : list [``experiment_base.Experiment``]
-        Experiments of different solvers on a common problem.
+    experiments : list [``experiment_base.ProblemSolver``]
+        Problem-solver pairs of different solvers on a common problem.
     n_postreps_init_opt : int
         Number of postreplications to take at initial x0 and optimal x*.
     crn_across_init_opt : bool, default=True
@@ -895,7 +895,7 @@ def post_normalize(experiments, n_postreps_init_opt, crn_across_init_opt=True, p
     initial_obj_val = np.mean(x0_postreps)
     opt_obj_val = np.mean(xstar_postreps)
     initial_opt_gap = initial_obj_val - opt_obj_val
-    # Store x0 and x* info and compute progress curves for each Experiment.
+    # Store x0 and x* info and compute progress curves for each ProblemSolver.
     for experiment in experiments:
         # DOUBLE-CHECK FOR SHALLOW COPY ISSUES.
         experiment.n_postreps_init_opt = n_postreps_init_opt
@@ -923,7 +923,7 @@ def post_normalize(experiments, n_postreps_init_opt, crn_across_init_opt=True, p
             norm_est_objectives = [(est_objective - opt_obj_val) / initial_opt_gap for est_objective in est_objectives]
             frac_intermediate_budgets = [budget / experiment.problem.factors["budget"] for budget in experiment.all_intermediate_budgets[mrep]]
             experiment.progress_curves.append(Curve(x_vals=frac_intermediate_budgets, y_vals=norm_est_objectives))
-        # Save Experiment object to .pickle file.
+        # Save ProblemSolver object to .pickle file.
         experiment.record_experiment_results()
 
 
@@ -933,8 +933,8 @@ def bootstrap_sample_all(experiments, bootstrap_rng, normalize=True):
 
     Parameters
     ----------
-    experiments : list [list [``experiment_base.Experiment``]]
-        Experiments of different solvers and/or problems.
+    experiments : list [list [``experiment_base.ProblemSolver``]]
+        Problem-solver pairs of different solvers and/or problems.
     bootstrap_rng : ``rng.MRG32k3a``
         Random number generator to use for bootstrapping.
     normalize : bool, default=True
@@ -962,15 +962,17 @@ def bootstrap_sample_all(experiments, bootstrap_rng, normalize=True):
     return bootstrap_curves
 
 
-def bootstrap_procedure(experiments, n_bootstraps, plot_type, beta=None, solve_tol=None, estimator=None, normalize=True):
+def bootstrap_procedure(experiments, n_bootstraps, conf_level, plot_type, beta=None, solve_tol=None, estimator=None, normalize=True):
     """Obtain bootstrap sample and compute confidence intervals.
 
     Parameters
     ----------
-    experiments : list [list [``experiment_base.Experiment``]]
-        Experiments of different solvers and/or problems.
+    experiments : list [list [``experiment_base.ProblemSolver``]]
+        Problem-solver pairs of different solvers and/or problems.
     n_bootstraps : int
         Number of times to generate a bootstrap sample of estimated progress curves.
+    conf_level : float
+        Confidence level for confidence intervals, i.e., 1-gamma; in (0, 1).
     plot_type : str
         String indicating which type of plot to produce:
             "mean" : estimated mean progress curve;
@@ -1011,7 +1013,11 @@ def bootstrap_procedure(experiments, n_bootstraps, plot_type, beta=None, solve_t
     # Distinguish cases where functional returns a scalar vs a curve.
     if plot_type in {"area_mean", "area_std_dev", "solve_time_quantile"}:
         # Functional returns a scalar.
-        bs_CI_lower_bounds, bs_CI_upper_bounds = compute_bootstrap_CI(bootstrap_replications, conf_level=0.95, bias_correction=True, overall_estimator=estimator)
+        bs_CI_lower_bounds, bs_CI_upper_bounds = compute_bootstrap_CI(bootstrap_replications,
+                                                                      conf_level=conf_level,
+                                                                      bias_correction=True,
+                                                                      overall_estimator=estimator
+                                                                      )
     elif plot_type in {"mean", "quantile", "solve_time_cdf", "cdf_solvability", "quantile_solvability", "diff_cdf_solvability", "diff_quantile_solvability"}:
         # Functional returns a curve.
         unique_budgets = list(np.unique([budget for curve in bootstrap_replications for budget in curve.x_vals]))
@@ -1021,7 +1027,7 @@ def bootstrap_procedure(experiments, n_bootstraps, plot_type, beta=None, solve_t
             bootstrap_subreplications = [curve.lookup(x=budget) for curve in bootstrap_replications]
             sub_estimator = estimator.lookup(x=budget)
             bs_CI_lower_bound, bs_CI_upper_bound = compute_bootstrap_CI(bootstrap_subreplications,
-                                                                        conf_level=0.95,
+                                                                        conf_level=conf_level,
                                                                         bias_correction=True,
                                                                         overall_estimator=sub_estimator
                                                                         )
@@ -1102,14 +1108,14 @@ def functional_of_curves(bootstrap_curves, plot_type, beta=0.5, solve_tol=0.1):
     return functional
 
 
-def compute_bootstrap_CI(observations, conf_level=0.95, bias_correction=True, overall_estimator=None):
+def compute_bootstrap_CI(observations, conf_level, bias_correction=True, overall_estimator=None):
     """Construct a bootstrap confidence interval for an estimator.
 
     Parameters
     ----------
     observations : list
         Estimators from all bootstrap instances.
-    conf_level : float, default=0.95
+    conf_level : float
         Confidence level for confidence intervals, i.e., 1-gamma; in (0, 1).
     bias_correction : bool, default=True
         True if bias-corrected bootstrap CIs (via percentile method) are to be used,
@@ -1203,8 +1209,8 @@ def check_common_problem_and_reference(experiments):
 
     Parameters
     ----------
-    experiments : list [``experiment_base.Experiment``]
-        Experiments of different solvers on a common problem.
+    experiments : list [``experiment_base.ProblemSolver``]
+        Problem-solver pairs of different solvers on a common problem.
     """
     ref_experiment = experiments[0]
     for experiment in experiments:
@@ -1216,14 +1222,14 @@ def check_common_problem_and_reference(experiments):
             print("At least two experiments have different optimal solutions.")
 
 
-def plot_progress_curves(experiments, plot_type, beta=0.50, normalize=True, all_in_one=True, n_bootstraps=100, plot_CIs=True, print_max_hw=True):
+def plot_progress_curves(experiments, plot_type, beta=0.50, normalize=True, all_in_one=True, n_bootstraps=100, conf_level=0.95, plot_CIs=True, print_max_hw=True):
     """Plot individual or aggregate progress curves for one or more solvers
     on a single problem.
 
     Parameters
     ----------
-    experiments : list [``experiment_base.Experiment``]
-        experiments of different solvers on a common problem
+    experiments : list [``experiment_base.ProblemSolver``]
+        Problem-solver pairs of different solvers on a common problem.
     plot_type : str
         String indicating which type of plot to produce:
             "all" : all estimated progress curves;
@@ -1238,6 +1244,8 @@ def plot_progress_curves(experiments, plot_type, beta=0.50, normalize=True, all_
         True if curves are to be plotted together, otherwise False.
     n_bootstraps : int, default=100
         Number of bootstrap samples.
+    conf_level : float
+        Confidence level for confidence intervals, i.e., 1-gamma; in (0, 1).
     plot_CIs : bool, default=True
         True if bootstrapping confidence intervals are to be plotted, otherwise False.
     print_max_hw : bool, default=True
@@ -1297,9 +1305,10 @@ def plot_progress_curves(experiments, plot_type, beta=0.50, normalize=True, all_
                 print("Not a valid plot type.")
             solver_curve_handles.append(handle)
             if plot_CIs and plot_type != "all":
-                # Note: "experiments" needs to be a list of list of Experiments.
+                # Note: "experiments" needs to be a list of list of ProblemSolver objects.
                 bs_CI_lb_curve, bs_CI_ub_curve = bootstrap_procedure(experiments=[[experiment]],
                                                                      n_bootstraps=n_bootstraps,
+                                                                     conf_level=conf_level,
                                                                      plot_type=plot_type,
                                                                      beta=beta,
                                                                      estimator=estimator,
@@ -1351,9 +1360,10 @@ def plot_progress_curves(experiments, plot_type, beta=0.50, normalize=True, all_
             else:
                 print("Not a valid plot type.")
             if plot_CIs and plot_type != "all":
-                # Note: "experiments" needs to be a list of list of Experiments.
+                # Note: "experiments" needs to be a list of list of ProblemSolvers.
                 bs_CI_lb_curve, bs_CI_ub_curve = bootstrap_procedure(experiments=[[experiment]],
                                                                      n_bootstraps=n_bootstraps,
+                                                                     conf_level=conf_level,
                                                                      plot_type=plot_type,
                                                                      beta=beta,
                                                                      estimator=estimator,
@@ -1371,19 +1381,21 @@ def plot_progress_curves(experiments, plot_type, beta=0.50, normalize=True, all_
     return file_list
 
 
-def plot_solvability_cdfs(experiments, solve_tol=0.1, all_in_one=True, n_bootstraps=100, plot_CIs=True, print_max_hw=True):
+def plot_solvability_cdfs(experiments, solve_tol=0.1, all_in_one=True, n_bootstraps=100, conf_level=0.95, plot_CIs=True, print_max_hw=True):
     """Plot the solvability cdf for one or more solvers on a single problem.
 
     Parameters
     ----------
-    experiments : list [``experiment_base.Experiment``]
-        Experiments of different solvers on a common problem.
+    experiments : list [``experiment_base.ProblemSolver``]
+        Problem-solver pairs of different solvers on a common problem.
     solve_tol : float, default=0.1
         Relative optimality gap definining when a problem is solved; in (0, 1].
     all_in_one : bool, default=True
         True if curves are to be plotted together, otherwise False.
     n_bootstraps : int, default=100
         Number of bootstrap samples.
+    conf_level : float
+        Confidence level for confidence intervals, i.e., 1-gamma; in (0, 1).
     plot_CIs : bool, default=True
         True if bootstrapping confidence intervals are to be plotted, otherwise False.
     print_max_hw : bool, default=True
@@ -1417,9 +1429,10 @@ def plot_solvability_cdfs(experiments, solve_tol=0.1, all_in_one=True, n_bootstr
             handle = estimator.plot(color_str=color_str)
             solver_curve_handles.append(handle)
             if plot_CIs:
-                # Note: "experiments" needs to be a list of list of Experiments.
+                # Note: "experiments" needs to be a list of list of ProblemSolver objects.
                 bs_CI_lb_curve, bs_CI_ub_curve = bootstrap_procedure(experiments=[[experiment]],
                                                                      n_bootstraps=n_bootstraps,
+                                                                     conf_level=conf_level,
                                                                      plot_type="solve_time_cdf",
                                                                      solve_tol=solve_tol,
                                                                      estimator=estimator,
@@ -1447,9 +1460,10 @@ def plot_solvability_cdfs(experiments, solve_tol=0.1, all_in_one=True, n_bootstr
             estimator = cdf_of_curves_crossing_times(experiment.progress_curves, threshold=solve_tol)
             estimator.plot()
             if plot_CIs:
-                # Note: "experiments" needs to be a list of list of Experiments.
+                # Note: "experiments" needs to be a list of list of Problem-Solver objects.
                 bs_CI_lb_curve, bs_CI_ub_curve = bootstrap_procedure(experiments=[[experiment]],
                                                                      n_bootstraps=n_bootstraps,
+                                                                     conf_level=conf_level,
                                                                      plot_type="solve_time_cdf",
                                                                      solve_tol=solve_tol,
                                                                      estimator=estimator,
@@ -1467,7 +1481,7 @@ def plot_solvability_cdfs(experiments, solve_tol=0.1, all_in_one=True, n_bootstr
     return file_list
 
 
-def plot_area_scatterplots(experiments, all_in_one=True, n_bootstraps=100, plot_CIs=True, print_max_hw=True):
+def plot_area_scatterplots(experiments, all_in_one=True, n_bootstraps=100, conf_level=0.95, plot_CIs=True, print_max_hw=True):
     """Plot a scatter plot of mean and standard deviation of area under progress curves.
     Either one plot for each solver or one plot for all solvers.
 
@@ -1478,12 +1492,14 @@ def plot_area_scatterplots(experiments, all_in_one=True, n_bootstraps=100, plot_
 
     Parameters
     ----------
-    experiments : list [list [``experiment_base.Experiment``]]
-        Experiments used to produce plots.
+    experiments : list [list [``experiment_base.ProblemSolver``]]
+        Problem-solver pairs used to produce plots.
     all_in_one : bool, default=True
         True if curves are to be plotted together, otherwise False.
     n_bootstraps : int, default=100
         Number of bootstrap samples.
+    conf_level : float
+        Confidence level for confidence intervals, i.e., 1-gamma; in (0, 1).
     plot_CIs : bool, default=True
         True if bootstrapping confidence intervals are to be plotted, otherwise False.
     print_max_hw : bool, default=True
@@ -1519,15 +1535,17 @@ def plot_area_scatterplots(experiments, all_in_one=True, n_bootstraps=100, plot_
                 mean_estimator = np.mean(areas)
                 std_dev_estimator = np.std(areas, ddof=1)
                 if plot_CIs:
-                    # Note: "experiments" needs to be a list of list of Experiments.
+                    # Note: "experiments" needs to be a list of list of ProblemSolver objects.
                     mean_bs_CI_lb, mean_bs_CI_ub = bootstrap_procedure(experiments=[[experiment]],
                                                                        n_bootstraps=n_bootstraps,
+                                                                       conf_level=conf_level,
                                                                        plot_type="area_mean",
                                                                        estimator=mean_estimator,
                                                                        normalize=True
                                                                        )
                     std_dev_bs_CI_lb, std_dev_bs_CI_ub = bootstrap_procedure(experiments=[[experiment]],
                                                                              n_bootstraps=n_bootstraps,
+                                                                             conf_level=conf_level,
                                                                              plot_type="area_std_dev",
                                                                              estimator=std_dev_estimator,
                                                                              normalize=True
@@ -1570,15 +1588,17 @@ def plot_area_scatterplots(experiments, all_in_one=True, n_bootstraps=100, plot_
                 mean_estimator = np.mean(areas)
                 std_dev_estimator = np.std(areas, ddof=1)
                 if plot_CIs:
-                    # Note: "experiments" needs to be a list of list of Experiments.
+                    # Note: "experiments" needs to be a list of list of ProblemSolver objects.
                     mean_bs_CI_lb, mean_bs_CI_ub = bootstrap_procedure(experiments=[[experiment]],
                                                                        n_bootstraps=n_bootstraps,
+                                                                       conf_level=conf_level,
                                                                        plot_type="area_mean",
                                                                        estimator=mean_estimator,
                                                                        normalize=True
                                                                        )
                     std_dev_bs_CI_lb, std_dev_bs_CI_ub = bootstrap_procedure(experiments=[[experiment]],
                                                                              n_bootstraps=n_bootstraps,
+                                                                             conf_level=conf_level,
                                                                              plot_type="area_std_dev",
                                                                              estimator=std_dev_estimator,
                                                                              normalize=True
@@ -1605,13 +1625,13 @@ def plot_area_scatterplots(experiments, all_in_one=True, n_bootstraps=100, plot_
     return file_list
 
 
-def plot_solvability_profiles(experiments, plot_type, all_in_one=True, n_bootstraps=100, plot_CIs=True, print_max_hw=True, solve_tol=0.1, beta=0.5, ref_solver=None):
+def plot_solvability_profiles(experiments, plot_type, all_in_one=True, n_bootstraps=100, conf_level=0.95, plot_CIs=True, print_max_hw=True, solve_tol=0.1, beta=0.5, ref_solver=None):
     """Plot the (difference of) solvability profiles for each solver on a set of problems.
 
     Parameters
     ----------
-    experiments : list [list [``experiment_base.Experiment``]]
-        Experiments used to produce plots.
+    experiments : list [list [``experiment_base.ProblemSolver``]]
+        Problem-solver pairs used to produce plots.
     plot_type : str
         String indicating which type of plot to produce:
             "cdf_solvability" : cdf-solvability profile;
@@ -1622,6 +1642,8 @@ def plot_solvability_profiles(experiments, plot_type, all_in_one=True, n_bootstr
         True if curves are to be plotted together, otherwise False.
     n_bootstraps : int, default=100
         Number of bootstrap samples.
+    conf_level : float
+        Confidence level for confidence intervals, i.e., 1-gamma; in (0, 1).
     plot_CIs : bool, default=True
         True if bootstrapping confidence intervals are to be plotted, otherwise False.
     print_max_hw : bool, default=True
@@ -1692,9 +1714,10 @@ def plot_solvability_profiles(experiments, plot_type, all_in_one=True, n_bootstr
                 handle = solver_curve.plot(color_str=color_str)
                 solver_curve_handles.append(handle)
                 if plot_CIs:
-                    # Note: "experiments" needs to be a list of list of Experiments.
+                    # Note: "experiments" needs to be a list of list of ProblemSolver objects.
                     bs_CI_lb_curve, bs_CI_ub_curve = bootstrap_procedure(experiments=[experiments[solver_idx]],
                                                                          n_bootstraps=n_bootstraps,
+                                                                         conf_level=conf_level,
                                                                          plot_type=plot_type,
                                                                          solve_tol=solve_tol,
                                                                          beta=beta,
@@ -1729,9 +1752,10 @@ def plot_solvability_profiles(experiments, plot_type, all_in_one=True, n_bootstr
                     handle = diff_solver_curve.plot(color_str=color_str)
                     solver_curve_handles.append(handle)
                     if plot_CIs:
-                        # Note: "experiments" needs to be a list of list of Experiments.
+                        # Note: "experiments" needs to be a list of list of ProblemSolver objects.
                         bs_CI_lb_curve, bs_CI_ub_curve = bootstrap_procedure(experiments=[experiments[solver_idx], experiments[ref_solver_idx]],
                                                                              n_bootstraps=n_bootstraps,
+                                                                             conf_level=conf_level,
                                                                              plot_type=plot_type,
                                                                              solve_tol=solve_tol,
                                                                              beta=beta,
@@ -1791,9 +1815,10 @@ def plot_solvability_profiles(experiments, plot_type, all_in_one=True, n_bootstr
                                                 ))
                 handle = solver_curve.plot()
                 if plot_CIs:
-                    # Note: "experiments" needs to be a list of list of Experiments.
+                    # Note: "experiments" needs to be a list of list of ProblemSolver objects.
                     bs_CI_lb_curve, bs_CI_ub_curve = bootstrap_procedure(experiments=[experiments[solver_idx]],
                                                                          n_bootstraps=n_bootstraps,
+                                                                         conf_level=conf_level,
                                                                          plot_type=plot_type,
                                                                          solve_tol=solve_tol,
                                                                          beta=beta,
@@ -1836,9 +1861,10 @@ def plot_solvability_profiles(experiments, plot_type, all_in_one=True, n_bootstr
                     diff_solver_curve = difference_of_curves(solver_curves[solver_idx], solver_curves[ref_solver_idx])
                     handle = diff_solver_curve.plot()
                     if plot_CIs:
-                        # Note: "experiments" needs to be a list of list of Experiments.
+                        # Note: "experiments" needs to be a list of list of ProblemSolver objects.
                         bs_CI_lb_curve, bs_CI_ub_curve = bootstrap_procedure(experiments=[experiments[solver_idx], experiments[ref_solver_idx]],
                                                                              n_bootstraps=n_bootstraps,
+                                                                             conf_level=conf_level,
                                                                              plot_type=plot_type,
                                                                              solve_tol=solve_tol,
                                                                              beta=beta,
@@ -1869,8 +1895,8 @@ def plot_terminal_progress(experiments, plot_type="violin", normalize=True, all_
 
     Parameters
     ----------
-    experiments : list [``experiment_base.Experiment``]
-        Experiments of different solvers on a common problem.
+    experiments : list [``experiment_base.ProblemSolver``]
+        ProblemSolver pairs of different solvers on a common problem.
     plot_type : str, default="violin"
         String indicating which type of plot to produce:
             "box" : comparative box plots;
@@ -1961,7 +1987,7 @@ def plot_terminal_scatterplots(experiments, all_in_one=True):
     Parameters
     ----------
     experiments : list [list [``experiment_base.Experiment``]]
-        Experiments used to produce plots.
+        ProblemSolver pairs used to produce plots.
     all_in_one : bool, default=True
         True if curves are to be plotted together, otherwise False.
 
@@ -2196,7 +2222,7 @@ def save_plot(solver_name, problem_name, plot_type, normalize, extra=None):
     return path_name
 
 
-class MetaExperiment(object):
+class ProblemsSolvers(object):
     """Base class for running one or more solver on one or more problem.
 
     Attributes
@@ -2225,7 +2251,7 @@ class MetaExperiment(object):
         Fixed model factors for each problem:
             outer key is problem name;
             inner key is factor name.
-    experiments : list [list [``experiment_base.Experiment``]]
+    experiments : list [list [``experiment_base.ProblemSolver``]]
         All problem-solver pairs.
 
     Parameters
@@ -2245,19 +2271,19 @@ class MetaExperiment(object):
         List of solvers.
     problems : list [``base.Problem``], optional
         List of problems.
-    experiments : list [list [``experiment_base.Experiment``]], optional
+    experiments : list [list [``experiment_base.ProblemSolver``]], optional
         All problem-solver pairs.
     """
     def __init__(self, solver_names=None, problem_names=None, solver_renames=None, problem_renames=None, fixed_factors_filename=None, solvers=None, problems=None, experiments=None):
-        """There are three ways to create a MetaExperiment object:
+        """There are three ways to create a ProblemsSolvers object:
             1. Provide the names of the solvers and problems to look up in directory.py.
             2. Provide the lists of unique solver and problem objects to pair.
-            3. Provide a list of list of Experiment objects.
+            3. Provide a list of list of ProblemSolver objects.
 
         Notes
         -----
-        TO DO: If loading some Experiment objects from file,
-        check that their factors match those in the overall MetaExperiment.
+        TO DO: If loading some ProblemSolver objects from file,
+        check that their factors match those in the overall ProblemsSolvers.
         """
         if experiments is not None:  # Method #3
             self.experiments = experiments
@@ -2268,7 +2294,7 @@ class MetaExperiment(object):
             self.n_solvers = len(self.solvers)
             self.n_problems = len(self.problems)
         elif solvers is not None and problems is not None:  # Method #2
-            self.experiments = [[Experiment(solver=solver, problem=problem) for problem in problems] for solver in solvers]
+            self.experiments = [[ProblemSolver(solver=solver, problem=problem) for problem in problems] for solver in solvers]
             self.solvers = solvers
             self.problems = problems
             self.solver_names = [solver.name for solver in self.solvers]
@@ -2286,7 +2312,7 @@ class MetaExperiment(object):
                 self.problem_names = problem_renames
             self.n_solvers = len(solver_names)
             self.n_problems = len(problem_names)
-            # Read in fixed solver/problem/model factors from .py file in the Experiments folder.
+            # Read in fixed solver/problem/model factors from .py file in the experiments folder.
             # File should contain three dictionaries of dictionaries called
             #   - all_solver_fixed_factors
             #   - all_problem_fixed_factors
@@ -2301,28 +2327,28 @@ class MetaExperiment(object):
                 self.all_solver_fixed_factors = getattr(all_factors, "all_solver_fixed_factors")
                 self.all_problem_fixed_factors = getattr(all_factors, "all_problem_fixed_factors")
                 self.all_model_fixed_factors = getattr(all_factors, "all_model_fixed_factors")
-            # Create all problem-solver pairs (i.e., instances of Experiment class)
+            # Create all problem-solver pairs (i.e., instances of ProblemSolver class)
             self.experiments = []
             for solver_idx in range(self.n_solvers):
                 solver_experiments = []
                 for problem_idx in range(self.n_problems):
                     try:
-                        # If a file exists, read in Experiment object.
+                        # If a file exists, read in ProblemSolver object.
                         with open(f"experiments/outputs/{self.solver_names[solver_idx]}_on_{self.problem_names[problem_idx]}.pickle", "rb") as file:
                             next_experiment = pickle.load(file)
                         # TODO: Check if the solver/problem/model factors in the file match
-                        # those for the MetaExperiment.
+                        # those for the ProblemsSolvers.
                     except Exception:
-                        # If no file exists, create new Experiment object.
+                        # If no file exists, create new ProblemSolver object.
                         print(f"No experiment file exists for {self.solver_names[solver_idx]} on {self.problem_names[problem_idx]}. Creating new experiment.")
-                        next_experiment = Experiment(solver_name=solver_names[solver_idx],
-                                                     problem_name=problem_names[problem_idx],
-                                                     solver_rename=self.solver_names[solver_idx],
-                                                     problem_rename=self.problem_names[problem_idx],
-                                                     solver_fixed_factors=self.all_solver_fixed_factors[self.solver_names[solver_idx]],
-                                                     problem_fixed_factors=self.all_problem_fixed_factors[self.problem_names[problem_idx]],
-                                                     model_fixed_factors=self.all_model_fixed_factors[self.problem_names[problem_idx]]
-                                                     )
+                        next_experiment = ProblemSolver(solver_name=solver_names[solver_idx],
+                                                        problem_name=problem_names[problem_idx],
+                                                        solver_rename=self.solver_names[solver_idx],
+                                                        problem_rename=self.problem_names[problem_idx],
+                                                        solver_fixed_factors=self.all_solver_fixed_factors[self.solver_names[solver_idx]],
+                                                        problem_fixed_factors=self.all_problem_fixed_factors[self.problem_names[problem_idx]],
+                                                        model_fixed_factors=self.all_model_fixed_factors[self.problem_names[problem_idx]]
+                                                        )
                     solver_experiments.append(next_experiment)
                 self.experiments.append(solver_experiments)
 
@@ -2393,8 +2419,8 @@ class MetaExperiment(object):
 
         Parameters
         ----------
-        experiments : list [``experiment_base.Experiment``]
-            Experiments of different solvers on a common problem.
+        experiments : list [``experiment_base.ProblemSolver``]
+            Problem-solver pairs of different solvers on a common problem.
         n_postreps_init_opt : int
             Number of postreplications to take at initial x0 and optimal x*.
         crn_across_init_opt : bool, default=True
@@ -2414,8 +2440,8 @@ def find_unique_solvers_problems(experiments):
 
     Parameters
     ----------
-    experiments : list [``experiment_base.Experiment``]
-        Experiments of different solvers on different problems.
+    experiments : list [``experiment_base.ProblemSolver``]
+        ProblemSolver pairs of different solvers on different problems.
 
     Returns
     -------
@@ -2442,8 +2468,8 @@ def find_missing_experiments(experiments):
 
     Parameters
     ----------
-    experiments : list [``experiment_base.Experiment``]
-        Experiments of different solvers on different problems.
+    experiments : list [``experiment_base.ProblemSolver``]
+        Problem-solver pairs of different solvers on different problems.
 
     Returns
     -------
@@ -2470,8 +2496,8 @@ def make_full_metaexperiment(existing_experiments, unique_solvers, unique_proble
 
     Parameters
     ----------
-    existing_experiments : list [``experiment_base.Experiment``]
-        Experiments of different solvers on different problems.
+    existing_experiments : list [``experiment_base.ProblemSolver``]
+        Problem-solver pairs of different solvers on different problems.
     unique_solvers : list [``base.Solver objects``]
         List of solvers present in the list of experiments.
     unique_problems : list [``base.Problem``]
@@ -2481,8 +2507,8 @@ def make_full_metaexperiment(existing_experiments, unique_solvers, unique_proble
 
     Returns
     -------
-    metaexperiment : ``experiment_base.MetaExperiment``
-        New MetaExperiment object.
+    metaexperiment : ``experiment_base.ProblemsSolvers``
+        New ProblemsSolvers object.
     """
     # Ordering of solvers and problems in unique_solvers and unique_problems
     # is used to construct experiments.
@@ -2494,6 +2520,6 @@ def make_full_metaexperiment(existing_experiments, unique_solvers, unique_proble
     for pair in missing_experiments:
         solver_idx = unique_solvers.index(pair[0])
         problem_idx = unique_problems.index(pair[1])
-        full_experiments[solver_idx][problem_idx] = Experiment(solver=pair[0], problem=pair[1])
-    metaexperiment = MetaExperiment(experiments=full_experiments)
+        full_experiments[solver_idx][problem_idx] = ProblemSolver(solver=pair[0], problem=pair[1])
+    metaexperiment = ProblemsSolvers(experiments=full_experiments)
     return metaexperiment

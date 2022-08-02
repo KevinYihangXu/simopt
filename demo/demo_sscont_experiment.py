@@ -9,7 +9,7 @@ import os.path as o
 import os
 sys.path.append(o.abspath(o.join(o.dirname(sys.modules[__name__].__file__), "..")))
 
-from experiment_base import Experiment, plot_area_scatterplots, post_normalize, plot_progress_curves, plot_solvability_cdfs, read_experiment_results, plot_solvability_profiles, plot_terminal_scatterplots, plot_terminal_progress
+from experiment_base import ProblemSolver, plot_area_scatterplots, post_normalize, plot_progress_curves, plot_solvability_cdfs, read_experiment_results, plot_solvability_profiles, plot_terminal_scatterplots, plot_terminal_progress
 
 # Default values of the (s, S) model:
 # "demand_mean": 100.0
@@ -32,48 +32,73 @@ rs_sample_sizes = [10, 50, 100]
 for dm in demand_means:
     for lm in lead_means:
         model_fixed_factors = {"demand_mean": dm,
-                                "lead_mean": lm
-                                }
+                               "lead_mean": lm}
         # Default budget for (s,S) inventory problem = 1000 replications.
         # RS with sample size of 100 will get through only 10 iterations.
         problem_fixed_factors = {"budget": 1000}
         problem_rename = f"SSCONT-1_dm={dm}_lm={lm}"
-        
+
         # Temporarily store experiments on the same problem for post-normalization.
         experiments_same_problem = []
-        
+
         # Loop over random search solvers.
         for rs_ss in rs_sample_sizes:
             solver_fixed_factors = {"sample_size": rs_ss}
             solver_rename = f"RNDSRCH_ss={rs_ss}"
             # Create experiment for the problem-solver pair.
-            new_experiment = Experiment(solver_name="RNDSRCH",
-                                        problem_name="SSCONT-1",
-                                        solver_rename=solver_rename,
-                                        problem_rename=problem_rename,
-                                        solver_fixed_factors=solver_fixed_factors,
-                                        problem_fixed_factors=problem_fixed_factors,
-                                        model_fixed_factors=model_fixed_factors
-                                        )
-            # Run experiment with M = 10.
-            new_experiment.run(n_macroreps=10)
-            # Post replicate experiment with N = 100.
-            new_experiment.post_replicate(n_postreps=100)
+            new_experiment = ProblemSolver(solver_name="RNDSRCH",
+                                           problem_name="SSCONT-1",
+                                           solver_rename=solver_rename,
+                                           problem_rename=problem_rename,
+                                           solver_fixed_factors=solver_fixed_factors,
+                                           problem_fixed_factors=problem_fixed_factors,
+                                           model_fixed_factors=model_fixed_factors
+                                           )
+            # Run experiment with M.
+            new_experiment.run(n_macroreps=M)
+            # Post replicate experiment with N.
+            new_experiment.post_replicate(n_postreps=N)
             experiments_same_problem.append(new_experiment)
 
         # Setup and run ASTRO-DF.
         solver_fixed_factors = {"delta_max": 200.0}
-        new_experiment = Experiment(solver_name="ASTRODF",
-                                    problem_name="SSCONT-1",
-                                    problem_rename=problem_rename,
-                                    solver_fixed_factors=solver_fixed_factors,
-                                    problem_fixed_factors=problem_fixed_factors,
-                                    model_fixed_factors=model_fixed_factors
-                                    )
-        # Run experiment with M = 10.
-        new_experiment.run(n_macroreps=10)
-        # Post replicate experiment with N = 100.
-        new_experiment.post_replicate(n_postreps=100)
+        new_experiment = ProblemSolver(solver_name="ASTRODF",
+                                       problem_name="SSCONT-1",
+                                       problem_rename=problem_rename,
+                                       solver_fixed_factors=solver_fixed_factors,
+                                       problem_fixed_factors=problem_fixed_factors,
+                                       model_fixed_factors=model_fixed_factors
+                                       )
+        # Run experiment with M.
+        new_experiment.run(n_macroreps=M)
+        # Post replicate experiment with N.
+        new_experiment.post_replicate(n_postreps=N)
+        experiments_same_problem.append(new_experiment)
+
+        # Setup and run Nelder-Mead.
+        new_experiment = ProblemSolver(solver_name="NELDMD",
+                                       problem_name="SSCONT-1",
+                                       problem_rename=problem_rename,
+                                       problem_fixed_factors=problem_fixed_factors,
+                                       model_fixed_factors=model_fixed_factors
+                                       )
+        # Run experiment withM.
+        new_experiment.run(n_macroreps=M)
+        # Post replicate experiment with N.
+        new_experiment.post_replicate(n_postreps=N)
+        experiments_same_problem.append(new_experiment)
+
+        # Setup and run STRONG.=
+        new_experiment = ProblemSolver(solver_name="STRONG",
+                                       problem_name="SSCONT-1",
+                                       problem_rename=problem_rename,
+                                       problem_fixed_factors=problem_fixed_factors,
+                                       model_fixed_factors=model_fixed_factors
+                                       )
+        # Run experiment with M.
+        new_experiment.run(n_macroreps=M)
+        # Post replicate experiment with N.
+        new_experiment.post_replicate(n_postreps=N)
         experiments_same_problem.append(new_experiment)
 
         # Post-normalize experiments with L = 200.
@@ -126,8 +151,10 @@ n_problems = len(experiments[0])
 # All progress curves for one experiment. Problem instance 0.
 plot_progress_curves([experiments[solver_idx][0] for solver_idx in range(n_solvers)], plot_type="all", all_in_one=True)
 
-# All progress curves for one experiment. Problem instance 22.
-plot_progress_curves([experiments[solver_idx][22] for solver_idx in range(n_solvers)], plot_type="all", all_in_one=True)
+
+for i in range(n_problems):
+    plot_progress_curves([experiments[solver_idx][i] for solver_idx in range(n_solvers)], plot_type="mean", all_in_one=True, plot_CIs=True, print_max_hw=True, normalize=False)
+    plot_terminal_progress([experiments[solver_idx][i] for solver_idx in range(n_solvers)], plot_type="violin", normalize=True, all_in_one=True)
 
 # Mean progress curves from all solvers on one problem. Problem instance 0.
 plot_progress_curves(experiments=[experiments[solver_idx][0] for solver_idx in range(n_solvers)],
