@@ -226,7 +226,7 @@ class Experiment_Window(tk.Tk):
 
         self.tab_one.grid_rowconfigure(0)
 
-        self.heading_list = ["Exp. Num", "Problem", "Solver", "Macroreps", "", "", "", "",""]
+        self.heading_list = ["Selected","Exp. Num", "Problem", "Solver", "Macroreps", "", "", "", "",""]
 
         for heading in self.heading_list:
             self.tab_one.grid_columnconfigure(self.heading_list.index(heading))
@@ -3285,11 +3285,12 @@ class Plot_Window():
                 param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[4],"beta":param_value_list[3]}
                 path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "diff_quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2], beta=param_value_list[3],ref_solver=param_value_list[4])
             elif self.plot_type_list[i] == "Terminal Progress Plot":
+                print("plot_type", param_value_list[1])
                 param_list = {"plot type": param_value_list[1], "normalize":param_value_list[2]}
                 path_name = experiment_base.plot_terminal_progress(exp, plot_type = param_value_list[1], normalize = param_value_list[2], all_in_one =param_value_list[0])
             elif self.plot_type_list[i] == "Area Scatter Plot":
                 param_list = {}
-                path_name = experiment_base.plot_terminal_scatterplots(exp2, plot_type="terminal_scatter", all_in_one = param_value_list[0])
+                path_name = experiment_base.plot_terminal_scatterplots(exp2,plot_type="terminal_scatter", all_in_one = param_value_list[0])
             else:
                 print(f"{self.plot_type_list[i]} is the plot_type_list at index {i}")
 
