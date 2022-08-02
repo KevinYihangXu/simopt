@@ -3290,7 +3290,7 @@ class Plot_Window():
                 path_name = experiment_base.plot_terminal_progress(exp, plot_type = param_value_list[1], normalize = param_value_list[2], all_in_one =param_value_list[0])
             elif self.plot_type_list[i] == "Area Scatter Plot":
                 param_list = {}
-                path_name = experiment_base.plot_terminal_scatterplots(exp2,plot_type="terminal_scatter", all_in_one = param_value_list[0])
+                path_name = experiment_base.plot_terminal_scatterplots(exp2, all_in_one = param_value_list[0])
             else:
                 print(f"{self.plot_type_list[i]} is the plot_type_list at index {i}")
 
