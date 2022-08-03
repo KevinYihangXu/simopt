@@ -2964,7 +2964,7 @@ class Plot_Window():
             self.experiment_list = experiment_list
             self.main_window = main_window
             self.plot_types_inputs = ["cdf_solvability", "quantile_solvability","diff_cdf_solvability","diff_quantile_solvability"]
-            self.plot_type_names = ["Mean Progress Curve", "Quantile Progress Curve", "Solve Time CDF", "Scatter Plot", "CDF Solvability","Quantile Solvability","CDF Difference Plot", "Quantile Difference Plot", "Terminal Progress Plot", "Area Scatter Plot"]
+            self.plot_type_names = ["Mean Progress Curve", "Quantile Progress Curve", "Solve time CDF", "Scatter Plot", "CDF Solvability","Quantile Solvability","CDF Difference Plot", "Quantile Difference Plot", "Terminal Progress Plot", "Area Scatter Plot"]
             self.num_plots = 0
             self.plot_exp_list = []
             self.plot_type_list = []
@@ -3252,38 +3252,36 @@ class Plot_Window():
 
 
             if self.plot_type_list[i] == "Mean Progress Curve":
-                path_name = experiment_base.plot_progress_curves(exp,plot_type="mean", normalize=param_value_list[3], all_in_one=param_value_list[1], plot_CIs=param_value_list[0], print_max_hw=param_value_list[2])
+                print("n_bootstraps", param_value_list[4])
+                print("conf_level",param_value_list[5])
+                path_name = experiment_base.plot_progress_curves(exp,plot_type="mean", normalize=param_value_list[3], all_in_one=param_value_list[1], plot_CIs=param_value_list[0], print_max_hw=param_value_list[2],n_bootstraps= int(param_value_list[4]), conf_level=param_value_list[5])
                 print("param_value_list Mean progress Curve ", param_value_list)
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[3]}
-                print("normalize",param_value_list[3])
-                print("all_in_one", param_value_list[1])
-                print("plot_CIs",param_value_list[0])
-                print("print_max_hw",param_value_list[2])
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[3],"n_bootstraps":int(param_value_list[4]), "conf_level":param_value_list[5]}
             elif self.plot_type_list[i] == "Quantile Progress Curve":
-                path_name = experiment_base.plot_progress_curves(exp,plot_type = "quantile",  beta=param_value_list[3], normalize=param_value_list[4], all_in_one=param_value_list[1],plot_CIs=param_value_list[0], print_max_hw=param_value_list[2])
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[4], "beta":param_value_list[3]}
-                print("normalize",param_value_list[4])
-                print("all_in_one", param_value_list[1])
-                print("plot_CIs",param_value_list[0])
-                print("print_max_hw",param_value_list[2])
+                print("n_bootstraps", param_value_list[5])
+                print("conf_level",param_value_list[6])
+                path_name = experiment_base.plot_progress_curves(exp,plot_type = "quantile",  beta=param_value_list[3], normalize=param_value_list[4], all_in_one=param_value_list[1],plot_CIs=param_value_list[0], print_max_hw=param_value_list[2],n_bootstraps= int(param_value_list[5]), conf_level=param_value_list[6] )
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[4], "beta":param_value_list[3],"n_bootstraps":param_value_list[5], "conf_level":param_value_list[6]}
             elif self.plot_type_list[i] == "Solve time CDF":
-                path_name = experiment_base.plot_solvability_cdfs(exp, solve_tol = param_value_list[2], plot_CIs=param_value_list[0], print_max_hw=param_value_list[1])
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2]}
+                path_name = experiment_base.plot_solvability_cdfs(exp, solve_tol = param_value_list[2], plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], n_bootstraps=int(param_value_list[3]), conf_level=param_value_list[4] )
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"n_bootstraps":param_value_list[3], "conf_level":param_value_list[4]}
             elif self.plot_type_list[i] == "Scatter Plot":
-                path_name = experiment_base.plot_area_scatterplots(exp2, plot_CIs=param_value_list[0], print_max_hw=param_value_list[1])
+                path_name = experiment_base.plot_area_scatterplots(exp2, plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], n_bootstraps= int(param_value_list[2]), conf_level=param_value_list[3] )
                 param_list = {}
             elif self.plot_type_list[i] == "CDF Solvability":
-                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "cdf_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2],ref_solver=None)
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2]}
+                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "cdf_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2],ref_solver=None, n_bootstraps= int(param_value_list[3]), conf_level=param_value_list[4] )
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"n_bootstraps":param_value_list[3], "conf_level":param_value_list[4]}
             elif self.plot_type_list[i] == "Quantile Solvability":
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol": param_value_list[2], "beta": param_value_list[3]}
-                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2],beta=param_value_list[3],ref_solver=None)
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol": param_value_list[2], "beta": param_value_list[3],"n_bootstraps":param_value_list[4], "conf_level":param_value_list[5]}
+                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2],beta=param_value_list[3],ref_solver=None, n_bootstraps= int(param_value_list[4]), conf_level=param_value_list[5] )
             elif self.plot_type_list[i] == "CDF Difference Plot":
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[3]}
-                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "diff_cdf_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1],solve_tol=param_value_list[2], ref_solver=param_value_list[3])
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[3],"n_bootstraps":param_value_list[4], "conf_level":param_value_list[5]}
+                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "diff_cdf_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1],solve_tol=param_value_list[2], ref_solver=param_value_list[3], n_bootstraps= int(param_value_list[4]), conf_level=param_value_list[5] )
             elif self.plot_type_list[i] == "Quantile Difference Plot":
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[4],"beta":param_value_list[3]}
-                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "diff_quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2], beta=param_value_list[3],ref_solver=param_value_list[4])
+                print("n_bootstraps", param_value_list[5])
+                print("conf_level",param_value_list[6])
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[4],"beta":param_value_list[3],"n_bootstraps":param_value_list[5], "conf_level":param_value_list[6]}
+                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "diff_quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2], beta=param_value_list[3],ref_solver=param_value_list[4], n_bootstraps= int(param_value_list[5]), conf_level=param_value_list[6] )
             elif self.plot_type_list[i] == "Terminal Progress Plot":
                 print("plot_type", param_value_list[1])
                 param_list = {"plot type": param_value_list[1], "normalize":param_value_list[2]}
@@ -3383,21 +3381,21 @@ class Plot_Window():
 
             # beta=0.50, normalize=True
             if plot_choice == "Mean Progress Curve":
-                param_list = {'normalize':True}
+                param_list = {'normalize':True, 'n_bootstraps': 100, 'conf_level':0.95}
             elif plot_choice == "Quantile Progress Curve":
-                param_list = {'beta':0.50, 'normalize':True}
-            elif plot_choice == "Solve Time CDF":
-                param_list = {'solve_tol':0.1}
+                param_list = {'beta':0.50, 'normalize':True, 'n_bootstraps': 100, 'conf_level':0.95}
+            elif plot_choice == "Solve time CDF":
+                param_list = {'solve_tol':0.1, 'n_bootstraps':100, 'conf_level':0.95}
             elif plot_choice == "Scatter Plot":
-                param_list = {}
+                param_list = { 'n_bootstraps':100, 'conf_level':0.95}
             elif plot_choice == "CDF Solvability":
-                param_list = {'solve_tol':0.1}
+                param_list = {'solve_tol':0.1, 'n_bootstraps':100, 'conf_level':0.95}
             elif plot_choice == "Quantile Solvability":
-                param_list = {'solve_tol':0.1, 'beta':0.5}
+                param_list = {'solve_tol':0.1, 'beta':0.5, 'n_bootstraps':100, 'conf_level':0.95}
             elif plot_choice == "CDF Difference Plot":
-                param_list = {'solve_tol':0.1, 'ref_solver':None}
+                param_list = {'solve_tol':0.1, 'ref_solver':None, 'n_bootstraps':100, 'conf_level':0.95}
             elif plot_choice == "Quantile Difference Plot":
-                param_list = {'solve_tol':0.1, 'beta':0.5, 'ref_solver':None}
+                param_list = {'solve_tol':0.1, 'beta':0.5, 'ref_solver':None, 'n_bootstraps':100, 'conf_level':0.95}
             elif plot_choice == "Terminal Progress Plot":
                 param_list = {'plot type': "violin", 'normalize': True}
             elif plot_choice == "Area Scatter Plot":
@@ -3442,7 +3440,7 @@ class Plot_Window():
             
             # Plot Settings
             i = 0 
-            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve Time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
+            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
                 # Confidence Intervals
                 entry1 = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry1.select()
@@ -3462,7 +3460,7 @@ class Plot_Window():
                 entry.grid(row=1, column=1, padx=10, pady=3) 
                 i += 1
             
-            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve Time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
+            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
                 # Print Max HW
                 entry2 = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry2.select()
@@ -3472,7 +3470,6 @@ class Plot_Window():
                 i += 1
             #for item in self.params:
              #   print(f"Item's value: {item.get()} at index {self.params.index(item)} in self.params list")
-            
             
             for param, param_val in param_list.items():
 
@@ -3509,6 +3506,22 @@ class Plot_Window():
                     entry = ttk.OptionMenu(self.CI_canvas, self.params[i], "violin",*bp_list)
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry.grid(row=i, column=1, padx=10, pady=3)
+                elif param == 'n_bootstraps':
+                    label = tk.Label(master=self.CI_canvas, text="Number of Bootstrap Samples", font="Calibri 14", wraplength="100")
+                    label.grid(row=i, column=0, padx=10, pady=3)
+                    entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
+                    if param_val is not None:
+                        entry.delete(0, 'end')
+                        entry.insert(index=tk.END, string=param_val)
+                    entry.grid(row=i, column=1, padx=10, pady=3)
+                elif param == 'conf_level':
+                    label = tk.Label(master=self.CI_canvas, text="Confidence Level", font="Calibri 14", wraplength="100")
+                    label.grid(row=i, column=0, padx=10, pady=3)
+                    entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
+                    if param_val is not None:
+                        entry.delete(0, 'end')
+                        entry.insert(index=tk.END, string=param_val)
+                    entry.grid(row=i, column=1, padx=10, pady=3)
                 else:
                     label = tk.Label(master=self.CI_canvas, text=param, font="Calibri 14")
                     label.grid(row=i, column=0, padx=10, pady=3)
@@ -3517,7 +3530,6 @@ class Plot_Window():
                         entry.delete(0, 'end')
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
-                
                 i += 1
 
              
