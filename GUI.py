@@ -2975,7 +2975,7 @@ class Plot_Window():
             self.bad_label = None
             self.plot_var = tk.StringVar(master=self.master)
 
-            self.params = [tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master)]
+            self.params = [tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master)]
 
             self.problem_menu = Listbox(self.master,selectmode = "multiple",exportselection=False, width=10,height=6)
             self.solver_menu = Listbox(self.master,selectmode = "multiple",exportselection=False, width=10,height=6)
@@ -3101,7 +3101,7 @@ class Plot_Window():
             self.plot_label.place(relx=.4, rely=.08)
             self.plot_menu.place(relx=.55, rely=.08)
 
-            self.add_button.place(relx=.4, rely=.38)
+            self.add_button.place(relx=.9, rely=.9)
 
             separator = ttk.Separator(master=self.master, orient='horizontal')
             separator.place(relx=0.35, rely=.08, relheight=.4)
@@ -3255,12 +3255,11 @@ class Plot_Window():
                 print("n_bootstraps", param_value_list[4])
                 print("conf_level",param_value_list[5])
                 path_name = experiment_base.plot_progress_curves(exp,plot_type="mean", normalize=param_value_list[3], all_in_one=param_value_list[1], plot_CIs=param_value_list[0], print_max_hw=param_value_list[2],n_bootstraps= int(param_value_list[4]), conf_level=param_value_list[5])
-                print("param_value_list Mean progress Curve ", param_value_list)
                 param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[3],"n_bootstraps":int(param_value_list[4]), "conf_level":param_value_list[5]}
             elif self.plot_type_list[i] == "Quantile Progress Curve":
                 print("n_bootstraps", param_value_list[5])
                 print("conf_level",param_value_list[6])
-                path_name = experiment_base.plot_progress_curves(exp,plot_type = "quantile",  beta=param_value_list[3], normalize=param_value_list[4], all_in_one=param_value_list[1],plot_CIs=param_value_list[0], print_max_hw=param_value_list[2],n_bootstraps= int(param_value_list[5]), conf_level=param_value_list[6] )
+                path_name = experiment_base.plot_progress_curves(exp,plot_type = "quantile",  beta=param_value_list[3], normalize=param_value_list[4],plot_CIs=param_value_list[0], all_in_one=param_value_list[1], print_max_hw=param_value_list[2],n_bootstraps= int(param_value_list[5]), conf_level=param_value_list[6] )
                 param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[4], "beta":param_value_list[3],"n_bootstraps":param_value_list[5], "conf_level":param_value_list[6]}
             elif self.plot_type_list[i] == "Solve time CDF":
                 path_name = experiment_base.plot_solvability_cdfs(exp, solve_tol = param_value_list[2], plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], n_bootstraps=int(param_value_list[3]), conf_level=param_value_list[4] )
@@ -3417,7 +3416,7 @@ class Plot_Window():
                                     tags="self.queue_frame")
             self.CI_canvas.grid_rowconfigure(0)
 
-            self.CI_label_frame.place(relx=.4, rely=.15, relheight=.2, relwidth=.25)
+            self.CI_label_frame.place(relx=.4, rely=.15, relheight=.3, relwidth=.25)
             
             self.settings_label_frame.destroy()
             self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings (Optional)")
@@ -3429,7 +3428,7 @@ class Plot_Window():
                                     tags="self.queue_frame")
             self.settings_canvas.grid_rowconfigure(0)
 
-            self.settings_label_frame.place(relx=.65, rely=.15, relheight=.2, relwidth=.3)
+            self.settings_label_frame.place(relx=.65, rely=.15, relheight=.3, relwidth=.3)
 
             tf_list = ['True','False']
             bp_list = ['violin','box']
@@ -3472,21 +3471,20 @@ class Plot_Window():
              #   print(f"Item's value: {item.get()} at index {self.params.index(item)} in self.params list")
             
             for param, param_val in param_list.items():
-
                 if param == 'normalize':
                     entry = ttk.OptionMenu(self.CI_canvas, self.params[i], "True", *tf_list)
-                    label = tk.Label(master=self.CI_canvas, text="Normalize By Relative Optimality Gap", font="Calibri 14", wraplength="200")
+                    label = tk.Label(master=self.CI_canvas, text="Normalize By Relative Optimality Gap", font="Calibri 12", wraplength="200")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'ref_solver':
-                    label = tk.Label(master=self.CI_canvas, text="Select Solver", font="Calibri 14")
+                    label = tk.Label(master=self.CI_canvas, text="Select Solver", font="Calibri 12")
                     if len(self.solvers_names) != 0:
-                        label = tk.Label(master=self.CI_canvas, text="Benchmark Solver", font="Calibri 14")
+                        label = tk.Label(master=self.CI_canvas, text="Benchmark Solver", font="Calibri 12")
                         entry = ttk.OptionMenu(self.CI_canvas, self.params[i], self.solvers_names[0], *self.solvers_names)
                         entry.grid(row=i, column=1, padx=10, pady=3)
                     label.grid(row=i, column=0, padx=10, pady=3)
                 elif param == 'solve_tol':
-                    label = tk.Label(master=self.CI_canvas, text="Optimality Gap Threshold", font="Calibri 14", wraplength="100")
+                    label = tk.Label(master=self.CI_canvas, text="Optimality Gap Threshold", font="Calibri 12", wraplength="100")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
@@ -3494,7 +3492,7 @@ class Plot_Window():
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'beta':
-                    label = tk.Label(master=self.CI_canvas, text="Quantile Probability", font="Calibri 14", wraplength="100")
+                    label = tk.Label(master=self.CI_canvas, text="Quantile Probability", font="Calibri 12", wraplength="100")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
@@ -3502,12 +3500,12 @@ class Plot_Window():
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'plot type':
-                    label = tk.Label(master=self.CI_canvas, text="Type of Terminal Progress Plot", font="Calibri 14", wraplength="200")
+                    label = tk.Label(master=self.CI_canvas, text="Type of Terminal Progress Plot", font="Calibri 12", wraplength="200")
                     entry = ttk.OptionMenu(self.CI_canvas, self.params[i], "violin",*bp_list)
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'n_bootstraps':
-                    label = tk.Label(master=self.CI_canvas, text="Number of Bootstrap Samples", font="Calibri 14", wraplength="100")
+                    label = tk.Label(master=self.CI_canvas, text="Number of Bootstrap Samples", font="Calibri 12", wraplength="100")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
@@ -3515,7 +3513,7 @@ class Plot_Window():
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'conf_level':
-                    label = tk.Label(master=self.CI_canvas, text="Confidence Level", font="Calibri 14", wraplength="100")
+                    label = tk.Label(master=self.CI_canvas, text="Confidence Level", font="Calibri 12", wraplength="100")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
@@ -3523,7 +3521,7 @@ class Plot_Window():
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 else:
-                    label = tk.Label(master=self.CI_canvas, text=param, font="Calibri 14")
+                    label = tk.Label(master=self.CI_canvas, text=param, font="Calibri 12")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
