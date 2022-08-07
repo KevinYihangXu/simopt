@@ -91,7 +91,7 @@ class Experiment_Window(tk.Tk):
         self.list_checked_experiments = []
 
         self.instruction_label = tk.Label(master=self.master, # window label is used in
-                            text = "Welcome to SimOpt \n Please Load or Add Your Experiment(s): ",
+                            text = "Welcome to SimOpt \n Please Load or Add Your Problem-Solver Pair(s): ",
                             font = "Calibri 15 bold",
                             justify="center")
 
@@ -149,18 +149,18 @@ class Experiment_Window(tk.Tk):
         self.macro_entry.insert(index=tk.END, string="10")
 
         self.add_button = ttk.Button(master=self.master,
-                                    text = "Add Experiment",
+                                    text = "Add Problem-Solver Pair",
                                     width = 15,
                                     command=self.add_function)
 
         self.clear_queue_button = ttk.Button(master=self.master,
-                                    text = "Clear All Experiments",
+                                    text = "Clear All Problem-Solver Pairs",
                                     width = 15,
                                     command = self.clear_queue)#(self.experiment_added, self.problem_added, self.solver_added, self.macros_added, self.run_button_added))
 
         self.crossdesign_button = ttk.Button(master=self.master,
-                                            text = "Cross-Design Experiments",
-                                            width = 20,
+                                            text = "Cross-Design Problem-Solver Group",
+                                            width = 45,
                                             command = self.crossdesign_function)
 
         self.pickle_file_load_button = ttk.Button(master=self.master,
@@ -181,8 +181,8 @@ class Experiment_Window(tk.Tk):
                                                 command = self.post_normal_all_function)
 
         self.make_meta_experiment = ttk.Button(master=self.master,
-                                                text = "Create Meta Experiment from Selected",
-                                                width = 30,
+                                                text = "Create Problem-Solver Groups from Selected",
+                                                width = 35,
                                                 state = "normal",
                                                 command = self.make_meta_experiment_func) 
                 
@@ -197,7 +197,7 @@ class Experiment_Window(tk.Tk):
                                                     wraplength = "500")
 
 
-        self.queue_label_frame = ttk.LabelFrame(master=self.master, text="Experiment")
+        self.queue_label_frame = ttk.LabelFrame(master=self.master, text="Problem-Solver Pair")
 
         self.queue_canvas = tk.Canvas(master=self.queue_label_frame, borderwidth=0)
 
@@ -222,7 +222,7 @@ class Experiment_Window(tk.Tk):
 
 
         self.tab_one = tk.Frame(master=self.notebook)
-        self.notebook.add(self.tab_one, text="Queue of Experiments")
+        self.notebook.add(self.tab_one, text="Queue of Problem-Solver Pairs")
 
         self.tab_one.grid_rowconfigure(0)
 
@@ -234,7 +234,7 @@ class Experiment_Window(tk.Tk):
             label.grid(row=0, column=self.heading_list.index(heading), padx=10, pady=3)
 
         self.tab_two = tk.Frame(master=self.notebook)
-        self.notebook.add(self.tab_two, text="Queue of Meta-Experiments")
+        self.notebook.add(self.tab_two, text="Queue of Problem-Solver Groups")
         self.tab_two.grid_rowconfigure(0)
         self.heading_list = ["Problems", "Solvers", "Macroreps", "", "", "", "",""]
 
@@ -260,7 +260,7 @@ class Experiment_Window(tk.Tk):
                 self.post_normal_all_button.place(x=10,rely=.95)
             else:
                 self.post_normal_all_button.place_forget()
-            if tab == 'Queue of Experiments':
+            if tab == 'Queue of Problem-Solver Pairs':
                 self.make_meta_experiment.place(x=10,rely=.95)
             else:
                 self.make_meta_experiment.place_forget()
@@ -287,11 +287,11 @@ class Experiment_Window(tk.Tk):
         self.macro_definition_label.bind("<Leave>",self.on_leave)
 
         self.or_label.place(x=185, rely=.06)
-        self.crossdesign_button.place(x=215, rely=.06, width=200)
+        self.crossdesign_button.place(x=215, rely=.06, width=235)
 
         y_place = .06
         self.pickle_file_load_button.place(x=10, rely=y_place, width=175)
-        self.or_label2.place(x=412, rely=.06)
+        self.or_label2.place(x=445, rely=.06)
         # self.or_label22.place(x=435, rely=.06)
 
         self.queue_label_frame.place(x=10, rely=.53, relheight=.39, relwidth=.99)
@@ -649,7 +649,6 @@ class Experiment_Window(tk.Tk):
                 self.int_float_entry = ttk.Entry(master=self.factor_tab_one_solver, textvariable = self.int_float_var, justify = tk.LEFT, width=15)
                 
                 if args and len(args) == 3 and args[0] == True:
-                    print("args[1][5][0]",args[1][5][0])
                     self.int_float_entry.insert(index=tk.END, string=str(args[1][5][0][factor_type]))
                 else:
                     self.int_float_entry.insert(index=tk.END, string=str(self.solver_object().specifications[factor_type].get("default")))
@@ -1491,7 +1490,7 @@ class Experiment_Window(tk.Tk):
         # self.crossdesign_window = tk.Tk()
         self.crossdesign_window = tk.Toplevel(self.master)
         self.crossdesign_window.geometry("350x350")
-        self.crossdesign_window.title("Cross-Design Experiments")
+        self.crossdesign_window.title("Cross-Design Problem-Solver Group")
         self.cross_app = Cross_Design_Window(self.crossdesign_window, self)
 
     def add_meta_exp_to_frame(self, n_macroreps=None, input_meta_experiment=None):
@@ -1552,7 +1551,7 @@ class Experiment_Window(tk.Tk):
         self.plot_button_added.grid(row=row_num, column=6, sticky='nsew', padx=10, pady=3)
 
         self.view_button_added = ttk.Button(master=self.tab_two,
-                                            text="View Meta Experiments",
+                                            text="View Problem-Solver Groups",
                                             command = partial(self.view_meta_function,row_num))
         self.view_button_added.grid(row=row_num, column=7, sticky='nsew', padx=10, pady=3)
 
@@ -1706,7 +1705,7 @@ class Experiment_Window(tk.Tk):
                     self.list_checked_experiments.append(experiment_checked)
                     print("checkbox",checkbox.get())
                     print("experiment_checked:", experiment_checked )
-                    # Making the checkbox in the Queue of Experiments disabled
+                    # Making the checkbox in the Queue of Porblem-Solver Groups disabled
                     check_box_object = self.check_box_list[index]
                     check_box_object["state"] = "disabled"
             self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments  =  experiment_base.find_missing_experiments(self.list_checked_experiments)
@@ -1792,7 +1791,7 @@ class Experiment_Window(tk.Tk):
         self.solver_menu.place(relx=.1, rely=.1 )
 
         view_button_added = self.widget_meta_list[row_index-1][7]
-        view_button_added["text"] = "View Meta Experiments"
+        view_button_added["text"] = "View Problem-Solver Groups"
         view_button_added["command"] = partial(self.view_meta_function, row_index)
         view_button_added.grid(row= (row_index), column=7, sticky='nsew', padx=10, pady=3)
 
@@ -2370,7 +2369,7 @@ class Cross_Design_Window():
             self.main_window = main_widow
 
             self.crossdesign_title_label = tk.Label(master=self.master,
-                                                    text = "Create Cross-Design Experiments",
+                                                    text = "Create Cross-Design Problem-Solver Group",
                                                     font = "Calibri 13 bold")
             self.crossdesign_title_label.place(x=10, y=25)
 
@@ -2431,8 +2430,8 @@ class Cross_Design_Window():
                 self.crossdesign_macro_entry.place(x=15, y=105+(25*solver_cnt))
 
                 self.crossdesign_button = ttk.Button(master=self.master,
-                                                text = "Add Cross-Design Experiments",
-                                                width = 30,
+                                                text = "Add Cross-Design Problem-Solver Group",
+                                                width = 35,
                                                 command = self.confirm_cross_design_function)
                 self.crossdesign_button.place(x=15, y=135+(25*solver_cnt))
 
@@ -2451,7 +2450,7 @@ class Cross_Design_Window():
                 self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
 
                 self.crossdesign_button = ttk.Button(master=self.master,
-                                                text = "Add Cross-Design Experiments",
+                                                text = "Add Cross-Design Problem-Solver Group",
                                                 width = 30,
                                                 command = self.confirm_cross_design_function)
                 self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
@@ -2470,7 +2469,7 @@ class Cross_Design_Window():
                 self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
 
                 self.crossdesign_button = ttk.Button(master=self.master,
-                                                text = "Add Cross-Design Experiments",
+                                                text = "Add Cross-Design Problem-Solver Group",
                                                 width = 30,
                                                 command = self.confirm_cross_design_function)
                 self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
@@ -2627,13 +2626,13 @@ class Post_Processing_Window():
         self.n_norm_postreps_entry.insert(index=tk.END, string="200")
 
         self.post_processing_run_label = tk.Label(master=self.master, # window label is used for
-                        text = "Complete Post-Processing of the Experiment",
+                        text = "Complete Post-Processing of the Problem-Solver Pairs",
                         font = "Calibri 13",
                         wraplength = "300")
 
         if self.meta:
             self.post_processing_run_label = tk.Label(master=self.master, # window label is used for
-                            text = "Complete Post-Processing and Post-Normalization of the Experiment(s)",
+                            text = "Complete Post-Processing and Post-Normalization of the Problem-Solver Pair(s)",
                             font = "Calibri 13",
                             wraplength = "300")
 
@@ -2886,7 +2885,7 @@ class Post_Normal_Window():
         self.n_postreps_init_opt_entry.insert(index=tk.END, string="200")
 
         self.post_processing_run_label = tk.Label(master=self.master, # window label is used for
-                        text = "Complete Post-Normalization of the Experiment(s)",
+                        text = "Complete Post-Normalization of the Problem-Solver Pair(s)",
                         font = "Calibri 13",
                         wraplength = "310")
 
@@ -3094,7 +3093,7 @@ class Plot_Window():
             self.tab_one = tk.Frame(master=self.notebook)
 
             #
-            self.notebook.add(self.tab_one, text="Experiments to Plot")
+            self.notebook.add(self.tab_one, text="Problem-Solver Pairs to Plot")
 
             self.tab_one.grid_rowconfigure(0)
 
@@ -3117,7 +3116,7 @@ class Plot_Window():
             self.plot_label.place(relx=.4, rely=.08)
             self.plot_menu.place(relx=.55, rely=.08)
 
-            self.add_button.place(relx=.9, rely=.9)
+            self.add_button.place(relx=.45, rely=.45)
 
             separator = ttk.Separator(master=self.master, orient='horizontal')
             separator.place(relx=0.35, rely=.08, relheight=.4)
