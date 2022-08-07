@@ -649,6 +649,7 @@ class Experiment_Window(tk.Tk):
                 self.int_float_entry = ttk.Entry(master=self.factor_tab_one_solver, textvariable = self.int_float_var, justify = tk.LEFT, width=15)
                 
                 if args and len(args) == 3 and args[0] == True:
+                    print("args[1][5][0]",args[1][5][0])
                     self.int_float_entry.insert(index=tk.END, string=str(args[1][5][0][factor_type]))
                 else:
                     self.int_float_entry.insert(index=tk.END, string=str(self.solver_object().specifications[factor_type].get("default")))
@@ -1717,12 +1718,19 @@ class Experiment_Window(tk.Tk):
     def meta_experiment_problem_solver_list(self, metaExperiment):
         self.list_meta_experiment_problems = []
         self.list_meta_experiment_solvers = []
+
+        self.list_meta_experiment_problems_object = []
+        self.list_meta_experiment_solvers_object = []
         
         self.list_meta_experiment_problems = metaExperiment.problem_names
         print("self.list_meta_experiment_problems", self.list_meta_experiment_problems)
         self.list_meta_experiment_solvers = metaExperiment.solver_names
         print("self.list_meta_experiment_solvers", self.list_meta_experiment_solvers)
-    
+
+        self.list_meta_experiment_problems_object =  metaExperiment.problems
+        print("self.list_meta_experiment_problems_object", self.list_meta_experiment_problems_object)
+        self.list_meta_experiment_solvers_object =  metaExperiment.solvers
+        print("self.list_meta_experiment_solvers_object", self.list_meta_experiment_solvers_object)
 
     def view_meta_function(self, row_num):
         row_index = row_num
@@ -1755,7 +1763,10 @@ class Experiment_Window(tk.Tk):
         view_button_added["command"] = partial(self.exit_meta_view, row_index)
         view_button_added.grid(row= (row_index), column=7, sticky='nsew', padx=10, pady=3)
 
+        self.add_button["state"] = "disabled"
+
     def exit_meta_view(self, row_index):
+        self.add_button["state"] = "normal"
         self.problem_menu2.destroy()
         self.problem_label2.destroy()
         self.solver_menu2.destroy()
@@ -1779,6 +1790,11 @@ class Experiment_Window(tk.Tk):
         
         self.solver_label.place(relx=.01, rely=.1)
         self.solver_menu.place(relx=.1, rely=.1 )
+
+        view_button_added = self.widget_meta_list[row_index-1][7]
+        view_button_added["text"] = "View Meta Experiments"
+        view_button_added["command"] = partial(self.view_meta_function, row_index)
+        view_button_added.grid(row= (row_index), column=7, sticky='nsew', padx=10, pady=3)
 
     def show_solver_factors2(self, *args):
         self.factor_label_frame_solver.destroy()
@@ -1823,7 +1839,7 @@ class Experiment_Window(tk.Tk):
             label = tk.Label(master=self.factor_tab_one_solver, text=heading, font="Calibri 14 bold")
             label.grid(row=0, column=self.factor_heading_list_solver.index(heading), padx=10, pady=3)
 
-        
+        print("self.solver_var2.get",self.solver_var2.get())
         self.solver_object = solver_directory[self.solver_var2.get()]
 
         count_factors_solver = 1
