@@ -45,8 +45,8 @@ solver_directory = {
     "STRONG": STRONG
 }
 solver_nonabbreviated_directory = {
-    "ASTRODF (SDCN)": ASTRODF,
-    "RandomSearch (SSMN)": RandomSearch
+    "Adaptive Sampling Trust-Region Optimization for Derivative-Free Simulations": ASTRODF,
+    "Random Search (SSMN)": RandomSearch
 }
 problem_directory = {
     "CNTNEWS-1": CntNVMaxProfit,
