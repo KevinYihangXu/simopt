@@ -11,11 +11,12 @@ from PIL import ImageTk, Image
 from directory import problem_directory
 from directory import problem_nonabbreviated_directory
 from directory import solver_directory
-from directory import solver_nonabbreviated_directory
 from directory import model_directory
 from directory import model_unabbreviated_directory
-from experiment_base import ProblemSolver, ProblemsSolvers
-import experiment_base
+from directory import solver_nonabbreviated_directory
+
+from wrapper_base import Experiment, MetaExperiment
+import wrapper_base
 import pickle
 from tkinter import Listbox
 import ast
@@ -86,12 +87,9 @@ class Experiment_Window(tk.Tk):
         self.post_norm_exp_list = []
         self.prev = 60
         self.meta_experiment_macro_reps = []
-        self.check_box_list = []
-        self.check_box_list_var = []
-        self.list_checked_experiments = []
 
         self.instruction_label = tk.Label(master=self.master, # window label is used in
-                            text = "Welcome to SimOpt \n Please Load or Add Your Problem-Solver Pair(s): ",
+                            text = "Welcome to SimOpt \n Please Load or Add Your Experiment(s): ",
                             font = "Calibri 15 bold",
                             justify="center")
 
@@ -149,18 +147,18 @@ class Experiment_Window(tk.Tk):
         self.macro_entry.insert(index=tk.END, string="10")
 
         self.add_button = ttk.Button(master=self.master,
-                                    text = "Add Problem-Solver Pair",
+                                    text = "Add Experiment",
                                     width = 15,
                                     command=self.add_function)
 
         self.clear_queue_button = ttk.Button(master=self.master,
-                                    text = "Clear All Problem-Solver Pairs",
+                                    text = "Clear All Experiments",
                                     width = 15,
                                     command = self.clear_queue)#(self.experiment_added, self.problem_added, self.solver_added, self.macros_added, self.run_button_added))
 
         self.crossdesign_button = ttk.Button(master=self.master,
-                                            text = "Cross-Design Problem-Solver Group",
-                                            width = 45,
+                                            text = "Cross-Design Experiments",
+                                            width = 20,
                                             command = self.crossdesign_function)
 
         self.pickle_file_load_button = ttk.Button(master=self.master,
@@ -180,12 +178,6 @@ class Experiment_Window(tk.Tk):
                                                 state = "normal",
                                                 command = self.post_normal_all_function)
 
-        self.make_meta_experiment = ttk.Button(master=self.master,
-                                                text = "Create Problem-Solver Groups from Selected",
-                                                width = 35,
-                                                state = "normal",
-                                                command = self.make_meta_experiment_func) 
-                
         self.pickle_file_pathname_label = tk.Label(master=self.master,
                                                     text = "File Selected:",
                                                     font = "Calibri 13")
@@ -197,7 +189,7 @@ class Experiment_Window(tk.Tk):
                                                     wraplength = "500")
 
 
-        self.queue_label_frame = ttk.LabelFrame(master=self.master, text="Problem-Solver Pair")
+        self.queue_label_frame = ttk.LabelFrame(master=self.master, text="Experiment")
 
         self.queue_canvas = tk.Canvas(master=self.queue_label_frame, borderwidth=0)
 
@@ -222,11 +214,11 @@ class Experiment_Window(tk.Tk):
 
 
         self.tab_one = tk.Frame(master=self.notebook)
-        self.notebook.add(self.tab_one, text="Queue of Problem-Solver Pairs")
+        self.notebook.add(self.tab_one, text="Queue of Experiments")
 
         self.tab_one.grid_rowconfigure(0)
 
-        self.heading_list = ["Selected","Exp. Num", "Problem", "Solver", "Macroreps", "", "", "", "",""]
+        self.heading_list = ["Check","Exp. Num", "Problem", "Solver", "Macroreps", "", "", "", "",""]
 
         for heading in self.heading_list:
             self.tab_one.grid_columnconfigure(self.heading_list.index(heading))
@@ -234,7 +226,7 @@ class Experiment_Window(tk.Tk):
             label.grid(row=0, column=self.heading_list.index(heading), padx=10, pady=3)
 
         self.tab_two = tk.Frame(master=self.notebook)
-        self.notebook.add(self.tab_two, text="Queue of Problem-Solver Groups")
+        self.notebook.add(self.tab_two, text="Queue of Meta-Experiments")
         self.tab_two.grid_rowconfigure(0)
         self.heading_list = ["Problems", "Solvers", "Macroreps", "", "", "", "",""]
 
@@ -255,16 +247,11 @@ class Experiment_Window(tk.Tk):
 
         def on_tab_change(event):
             tab = event.widget.tab('current')['text']
-            if tab == 'Post-Normalize by Problem':
+            if tab == 'Post-Normalize by Problem' or 'Queue of Experiements':
                 self.post_norm_setup()
                 self.post_normal_all_button.place(x=10,rely=.95)
             else:
                 self.post_normal_all_button.place_forget()
-            if tab == 'Queue of Problem-Solver Pairs':
-                self.make_meta_experiment.place(x=10,rely=.95)
-            else:
-                self.make_meta_experiment.place_forget()
-
 
 
         self.notebook.bind('<<NotebookTabChanged>>', on_tab_change)
@@ -287,11 +274,11 @@ class Experiment_Window(tk.Tk):
         self.macro_definition_label.bind("<Leave>",self.on_leave)
 
         self.or_label.place(x=185, rely=.06)
-        self.crossdesign_button.place(x=215, rely=.06, width=235)
+        self.crossdesign_button.place(x=215, rely=.06, width=200)
 
         y_place = .06
         self.pickle_file_load_button.place(x=10, rely=y_place, width=175)
-        self.or_label2.place(x=445, rely=.06)
+        self.or_label2.place(x=412, rely=.06)
         # self.or_label22.place(x=435, rely=.06)
 
         self.queue_label_frame.place(x=10, rely=.53, relheight=.39, relwidth=.99)
@@ -323,7 +310,7 @@ class Experiment_Window(tk.Tk):
         # if args and len(args) == 2:
         #     print("ARGS: ", args[1])
         #("arg length:", len(args))
-
+    
         self.problem_factors_list = []
         self.problem_factors_types = []
 
@@ -363,9 +350,11 @@ class Experiment_Window(tk.Tk):
             label_problem = tk.Label(master=self.factor_tab_one_problem, text=heading, font="Calibri 14 bold")
             label_problem.grid(row=0, column=self.factor_heading_list_problem.index(heading), padx=10, pady=3)
 
-        
-        self.problem_object = problem_nonabbreviated_directory[self.problem_var.get()]
-        
+        if self.problem_var.get() in problem_nonabbreviated_directory:
+            self.problem_object = problem_nonabbreviated_directory[self.problem_var.get()]
+        elif self.problem_var.get() in problem_directory:
+            self.problem_object = problem_directory[self.problem_var.get()]
+
         count_factors_problem = 1
         for num, factor_type in enumerate(self.problem_object().specifications, start=0):
             #(factor_type, len(self.problem_object().specifications[factor_type]['default']) )
@@ -405,7 +394,7 @@ class Experiment_Window(tk.Tk):
 
                 count_factors_problem += 1
 
-
+            
             if self.problem_object().specifications[factor_type].get("datatype") == bool:
 
                 self.boolean_description_problem = tk.Label(master=self.factor_tab_one_problem,
@@ -415,7 +404,7 @@ class Experiment_Window(tk.Tk):
 
                 self.boolean_list_problem = ["True", "False"]
                 self.boolean_var_problem = tk.StringVar(self.factor_tab_one_problem)
-
+                
                 self.boolean_menu_problem = ttk.OptionMenu(self.factor_tab_one_problem, self.boolean_var_problem, str(self.problem_object().specifications[factor_type].get("default")), *self.boolean_list)
 
                 self.boolean_description_problem.grid(row=count_factors_problem, column=0, sticky='nsew')
@@ -438,14 +427,15 @@ class Experiment_Window(tk.Tk):
             problem_object = problem_nonabbreviated_directory[self.problem_var.get()]
             oldname = problem_object().name
             
-
+            
         self.save_label_problem = tk.Label(master=self.factor_tab_one_problem,
                                             text = "Save Problem As",
                                             font = "Calibri 13")
 
         self.save_var_problem = tk.StringVar(self.factor_tab_one_problem)
         self.save_entry_problem = ttk.Entry(master=self.factor_tab_one_problem, textvariable = self.save_var_problem, justify = tk.LEFT)
-        
+        print("self.factor_tab_one_prblem", self.factor_tab_one_problem)
+        print("self.save_var_problem",self.save_var_problem.get())
         self.save_entry_problem.insert(index=tk.END, string=oldname)
 
         self.save_label_problem.grid(row=count_factors_problem, column=0, sticky='nsew')
@@ -465,8 +455,12 @@ class Experiment_Window(tk.Tk):
 
         ## Rina Adding After this 
         problem = str(self.problem_var.get())  
-        self.oracle = model_unabbreviated_directory[problem] # returns model string
-        self.oracle_object = model_directory[self.oracle]
+        if problem in model_unabbreviated_directory:
+            self.oracle = model_unabbreviated_directory[problem] # returns model string
+            self.oracle_object = model_directory[self.oracle]
+        elif problem in model_directory:
+            self.oracle = model_directory[problem]
+
         ##self.oracle = problem.split("-") 
         ##self.oracle = self.oracle[0] 
         ##self.oracle_object = model_directory[self.oracle] 
@@ -580,6 +574,7 @@ class Experiment_Window(tk.Tk):
         if str(self.solver_var.get()) != "Solver":
             self.add_button.place(x=10, rely=.48, width=200, height=30)
 
+    
     def show_solver_factors(self, *args):
         
         if args and len(args) == 3 and args[2] == False:
@@ -750,7 +745,7 @@ class Experiment_Window(tk.Tk):
                 temp_solver = solver_nonabbreviated_directory[self.solver_var.get()]
                 temp_solver_name = temp_solver().name
 
-                temp_experiment = ProblemSolver(solver_name=temp_solver_name, problem_name=temp_problem_name)
+                temp_experiment = Experiment(solver_name=temp_solver_name, problem_name=temp_problem_name)
                 comp = temp_experiment.check_compatibility()
 
                 if comp == "":
@@ -774,13 +769,6 @@ class Experiment_Window(tk.Tk):
         self.experiment_master_list.pop(integer-1)
         self.experiment_object_list.pop(integer-1)
         self.widget_list.pop(integer-1)
-
-        self.check_box_list[integer-1].grid_remove()
-
-        self.check_box_list.pop(integer -1)
-        self.check_box_list_var.pop(integer -1)
-
-
 
         # if (integer - 1) in self.normalize_list:
         #     self.normalize_list.remove(integer - 1)
@@ -824,11 +812,11 @@ class Experiment_Window(tk.Tk):
 
             postprocess_button_added = row_of_widgets[6]
             postprocess_button_added["command"] = partial(self.post_rep_function, row_index+1)
-            
+
             row_of_widgets[6] = postprocess_button_added
 
-            current_check_box = self.check_box_list[row_index]
-            current_check_box.grid(row =(row_index+1), column=0, sticky='nsew', padx=10, pady=3)
+            
+            row_of_widgets[8].grid(row= (row_index+1), column=0, sticky='nsew', padx=10, pady=3)
             row_of_widgets[7].grid(row= (row_index+1), column=1, sticky='nsew', padx=10, pady=3)
             row_of_widgets[0].grid(row= (row_index+1), column=2, sticky='nsew', padx=10, pady=3)
             row_of_widgets[1].grid(row= (row_index+1), column=3, sticky='nsew', padx=10, pady=3)
@@ -837,9 +825,6 @@ class Experiment_Window(tk.Tk):
             row_of_widgets[4].grid(row= (row_index+1), column=6, sticky='nsew', padx=10, pady=3)
             row_of_widgets[5].grid(row= (row_index+1), column=7, sticky='nsew', padx=10, pady=3)
             row_of_widgets[6].grid(row= (row_index+1), column=8, sticky='nsew', padx=10, pady=3)
-            
-
-
 
         self.count_experiment_queue = len(self.widget_list) + 1
 
@@ -881,11 +866,6 @@ class Experiment_Window(tk.Tk):
             plot_button_added["command"] = partial(self.plot_meta_function,row_index+1)
             row_of_widgets[6] = plot_button_added
 
-            view_button_added = row_of_widgets[7]
-            view_button_added["command"] = partial(self.view_meta_function,row_index+1)
-            row_of_widgets[7] = view_button_added
-
-
             row_of_widgets[0].grid(row= (row_index+1), column=0, sticky='nsew', padx=10, pady=3)
             row_of_widgets[1].grid(row= (row_index+1), column=1, sticky='nsew', padx=10, pady=3)
             row_of_widgets[2].grid(row= (row_index+1), column=2, sticky='nsew', padx=10, pady=3)
@@ -893,8 +873,7 @@ class Experiment_Window(tk.Tk):
             row_of_widgets[4].grid(row= (row_index+1), column=4, sticky='nsew', padx=10, pady=3)
             row_of_widgets[5].grid(row= (row_index+1), column=5, sticky='nsew', padx=10, pady=3)
             row_of_widgets[6].grid(row= (row_index+1), column=6, sticky='nsew', padx=10, pady=3)
-            row_of_widgets[7].grid(row= (row_index+1), column=6, sticky='nsew', padx=10, pady=3)
-            
+
         # self.count_meta_experiment_queue = len(self.widget_meta_list) + 1
         self.count_meta_experiment_queue = self.count_meta_experiment_queue - 1
 
@@ -911,6 +890,7 @@ class Experiment_Window(tk.Tk):
         #(current_experiment)
         current_experiment_arguments = self.experiment_master_list[row_index-1]
 
+        print("current_experiemnt_arguments", current_experiment_arguments)
         
         self.problem_var.set(current_experiment_arguments[0])
         #self.problem_var.set(problem_solver_abbreviated_name_to_unabbreviated(current_experiment_arguments[0], problem_directory, problem_nonabbreviated_directory))
@@ -919,11 +899,13 @@ class Experiment_Window(tk.Tk):
         #self.solver_var.set(problem_solver_abbreviated_name_to_unabbreviated(current_experiment_arguments[1], solver_directory, solver_nonabbreviated_directory))'
         
         self.macro_var.set(current_experiment_arguments[2])
+        
+        print("current_experiment_arguments[0]",current_experiment_arguments[0])
         self.show_problem_factors(True, current_experiment_arguments)
-        #print(" self.show_problem_factors", self.show_problem_factors(True, current_experiment_arguments))
+        
         # self.my_experiment[1][3][1]
         self.show_solver_factors(True, current_experiment_arguments, False)
-        #print("self.show_solver_factors", self. show_solver_factors(True, current_experiment_arguments))
+        
         viewEdit_button_added = self.widget_list[row_index-1][5]
         viewEdit_button_added["text"] = "Save Changes"
         viewEdit_button_added["command"] = partial(self.save_edit_function, row_index)
@@ -996,17 +978,13 @@ class Experiment_Window(tk.Tk):
                 self.macro_reps = self.selected[2]
                 self.solver_name = self.selected[1]
                 self.problem_name = self.selected[0]
-
-                
                 
                 solver_object,self.solver_name = problem_solver_nonabbreviated_to_object(self.solver_name,solver_nonabbreviated_directory)
                 problem_object, self.problem_name = problem_solver_nonabbreviated_to_object(self.problem_name,problem_nonabbreviated_directory)
-                
+            
+                #self.selected[0] = self.problem_name
 
-                # self.selected[0] = self.problem_name
-
-                self.my_experiment = ProblemSolver(solver_name=self.solver_name, problem_name=self.problem_name, solver_rename=self.solver_rename, problem_rename=self.problem_rename, solver_fixed_factors=self.solver_factors, problem_fixed_factors=self.problem_factors, model_fixed_factors=self.oracle_factors)
-                print("type", type(self.selected[2]))
+                self.my_experiment = Experiment(solver_name=self.solver_name, problem_name=self.problem_name, solver_rename=self.solver_rename, problem_rename=self.problem_rename, solver_fixed_factors=self.solver_factors, problem_fixed_factors=self.problem_factors, model_fixed_factors=self.oracle_factors)
                 self.my_experiment.n_macroreps = self.selected[2]
                 self.my_experiment.post_norm_ready = False
 
@@ -1032,12 +1010,11 @@ class Experiment_Window(tk.Tk):
                                                     font = "Calibri 12",
                                                     justify="center")
                     self.problem_added.grid(row=self.count_experiment_queue, column=2, sticky='nsew', padx=10, pady=3)
-
-                    self.checkbox_select_var = tk.BooleanVar(self.tab_one,value = False)
-                    self.checkbox_select = tk.Checkbutton(master=self.tab_one,text="", state = "normal", variable =self.checkbox_select_var )
+                    
+                    self.checkbox_select = tk.Checkbutton(master=self.tab_one,text="", onvalue = True, offvalue= False, state = "normal")
                     self.checkbox_select.deselect()
                     self.checkbox_select.grid(row=self.count_experiment_queue, column=0, sticky='nsew', padx=10, pady=3)
-
+                    
                     self.exp_num = tk.Label(master=self.tab_one,
                                                     text = str(self.count_experiment_queue),
                                                     font = "Calibri 12",
@@ -1077,10 +1054,7 @@ class Experiment_Window(tk.Tk):
                                                         state = "disabled")
                     self.postprocess_button_added.grid(row=self.count_experiment_queue, column=8, sticky='nsew', padx=10, pady=3)
 
-                    self.widget_row = [self.problem_added, self.solver_added, self.macros_added, self.run_button_added, self.viewEdit_button_added, self.clear_button_added, self.postprocess_button_added, self.exp_num]
-                    self.check_box_list.append(self.checkbox_select)
-                    self.check_box_list_var.append(self.checkbox_select_var)
-
+                    self.widget_row = [self.problem_added, self.solver_added, self.macros_added, self.run_button_added, self.viewEdit_button_added, self.clear_button_added, self.postprocess_button_added, self.exp_num,self.checkbox_select]
                     self.widget_list.insert(place,self.widget_row)
 
                     separator = ttk.Separator(master=self.tab_one, orient='horizontal')
@@ -1324,12 +1298,15 @@ class Experiment_Window(tk.Tk):
                     self.experiment_master_list.insert(place,None)
 
                     self.rows = 5
-
-                    self.checkbox_select_var = tk.BooleanVar(self.tab_one,value = False)
-                    self.checkbox_select = tk.Checkbutton(master=self.tab_one,text="", state = "normal", variable =self.checkbox_select_var )
+                    
+                    # self.select_checkbox = tk.Checkbutton(self.tab_one,text="",state="disabled",command=partial(self.
+                    # checkbox_function, self.count_experiment_queue - 1))
+        # self.select_checkbox.grid(row=self.count_experiment_queue, column=7, sticky='nsew', padx=10, pady=3)
+                    
+                    self.checkbox_select = tk.Checkbutton(master=self.tab_one,text="", onvalue = True, offvalue= False, state = "normal")
                     self.checkbox_select.deselect()
                     self.checkbox_select.grid(row=self.count_experiment_queue, column=0, sticky='nsew', padx=10, pady=3)
-
+                    
                     self.exp_num = tk.Label(master=self.tab_one,
                                                     text=str(self.count_experiment_queue),
                                                     font = "Calibri 12",
@@ -1376,10 +1353,8 @@ class Experiment_Window(tk.Tk):
                     self.postprocess_button_added.grid(row=self.count_experiment_queue, column=8, sticky='nsew', padx=10, pady=3)
 
 
-                    self.widget_row = [self.problem_added, self.solver_added, self.macros_added, self.run_button_added, self.viewEdit_button_added, self.clear_button_added, self.postprocess_button_added, self.exp_num]
+                    self.widget_row = [self.problem_added, self.solver_added, self.macros_added, self.run_button_added, self.viewEdit_button_added, self.clear_button_added, self.postprocess_button_added, self.exp_num, self.checkbox_select]
                     self.widget_list.insert(place,self.widget_row)
-                    self.check_box_list.append(self.checkbox_select)
-                    self.check_box_list_var.append(self.checkbox_select_var)
 
                     row_of_widgets = self.widget_list[len(self.widget_list) - 1]
                     if self.my_experiment.check_run() == True:
@@ -1390,6 +1365,9 @@ class Experiment_Window(tk.Tk):
                         run_button["state"] = "disabled"
                         run_button = row_of_widgets[6]
                         run_button["state"] = "normal"
+                        run_button = row_of_widgets[8]
+                        run_button["state"] = "normal"
+
                         self.my_experiment.post_norm_ready = False
                         if self.my_experiment.check_postreplicate():
                             self.experiment_object_list[place].post_norm_ready = True
@@ -1421,6 +1399,7 @@ class Experiment_Window(tk.Tk):
         self.widget_list[row_index][3]["text"] = "Run Complete"
         self.widget_list[row_index][4]["state"] = "disabled"
         self.widget_list[row_index][6]["state"] = "normal"
+        self.widget_list[row_index][8]["state"] = "normal"
         # run_button["state"] = "disabled"
         # run_button = row_of_widgets[4]
         # run_button["state"] = "disabled"
@@ -1435,9 +1414,7 @@ class Experiment_Window(tk.Tk):
         self.selected = self.experiment_master_list[row_index]
         self.macro_reps = self.selected[2]
 
-        print("type macro reps", type(self.macro_reps))
         self.my_experiment.run(n_macroreps=self.macro_reps)
-        
 
     def post_rep_function(self, integer):
         row_index = integer - 1
@@ -1469,6 +1446,7 @@ class Experiment_Window(tk.Tk):
             self.widget_list[row_index][6]["state"] = "disabled"
             # self.widget_list[row_index][7]["state"] = "normal"
     
+
     def checkbox_function2(self, exp, rowNum):
         newlist = sorted(self.experiment_object_list, key=lambda x: x.problem.name)
         prob_name = newlist[rowNum].problem.name
@@ -1483,37 +1461,22 @@ class Experiment_Window(tk.Tk):
             self.normalize_list2.append(rowNum)
             self.post_norm_exp_list.append(exp)
             for i in self.widget_norm_list:
+
                 if i[0]["text"] != prob_name:
-                    i[2]["state"] = "disable"
+                    i[2]["state"] = "disabled"
 
     def crossdesign_function(self):
         # self.crossdesign_window = tk.Tk()
         self.crossdesign_window = tk.Toplevel(self.master)
         self.crossdesign_window.geometry("350x350")
-        self.crossdesign_window.title("Cross-Design Problem-Solver Group")
+        self.crossdesign_window.title("Cross-Design Experiments")
         self.cross_app = Cross_Design_Window(self.crossdesign_window, self)
 
-    def add_meta_exp_to_frame(self, n_macroreps=None, input_meta_experiment=None):
-        print("n_macroreps", n_macroreps)
-        print("input_meta_experiment", input_meta_experiment)
-        if n_macroreps == None and input_meta_experiment != None:
-            self.cross_app = Cross_Design_Window(master = None, main_widow = None, forced_creation = True)
-            self.cross_app.crossdesign_MetaExperiment = input_meta_experiment
-            self.meta_experiment_macro_reps.append("mixed")
-            text_macros_added = "mixed"
-        elif n_macroreps != None and input_meta_experiment == None:
-            self.meta_experiment_macro_reps.append(int(n_macroreps.get()))
-            text_macros_added = n_macroreps.get()
+    def add_meta_exp_to_frame(self,n_macroreps):
+
+        self.meta_experiment_macro_reps.append(int(n_macroreps.get()))
 
         row_num = self.count_meta_experiment_queue + 1
-
-        self.macros_added = tk.Label(master=self.tab_two,
-                                        text= text_macros_added,
-                                        font = "Calibri 12",
-                                        justify="center")
-        self.macros_added.grid(row=row_num, column=2, sticky='nsew', padx=10, pady=3)
-
-        
         self.problem_added = tk.Label(master=self.tab_two,
                                                     text=self.cross_app.crossdesign_MetaExperiment.problem_names,
                                                     font = "Calibri 12",
@@ -1526,7 +1489,11 @@ class Experiment_Window(tk.Tk):
                                         justify="center")
         self.solver_added.grid(row=row_num, column=1, sticky='nsew', padx=10, pady=3)
 
-        
+        self.macros_added = tk.Label(master=self.tab_two,
+                                        text= n_macroreps.get(),
+                                        font = "Calibri 12",
+                                        justify="center")
+        self.macros_added.grid(row=row_num, column=2, sticky='nsew', padx=10, pady=3)
 
         self.run_button_added = ttk.Button(master=self.tab_two,
                                             text="Run" ,
@@ -1539,7 +1506,7 @@ class Experiment_Window(tk.Tk):
         self.clear_button_added.grid(row=row_num, column=4, sticky='nsew', padx=10, pady=3)
 
         self.postprocess_button_added = ttk.Button(master=self.tab_two,
-                                            text="Post-Process and Post-Normalize",
+                                            text="Post-Process",
                                             command = partial(self.post_rep_meta_function,row_num),
                                             state = "disabled")
         self.postprocess_button_added.grid(row=row_num, column=5, sticky='nsew', padx=10, pady=3)
@@ -1550,17 +1517,11 @@ class Experiment_Window(tk.Tk):
                                             state = "disabled")
         self.plot_button_added.grid(row=row_num, column=6, sticky='nsew', padx=10, pady=3)
 
-        self.view_button_added = ttk.Button(master=self.tab_two,
-                                            text="View Problem-Solver Groups",
-                                            command = partial(self.view_meta_function,row_num))
-        self.view_button_added.grid(row=row_num, column=7, sticky='nsew', padx=10, pady=3)
-
-        
 
         # self.select_checkbox = tk.Checkbutton(self.tab_one,text="",state="disabled",command=partial(self.checkbox_function, self.count_experiment_queue - 1))
         # self.select_checkbox.grid(row=self.count_experiment_queue, column=7, sticky='nsew', padx=10, pady=3)
 
-        self.widget_row_meta = [self.problem_added, self.solver_added, self.macros_added, self.run_button_added, self.clear_button_added, self.postprocess_button_added, self.plot_button_added, self.view_button_added]
+        self.widget_row_meta = [self.problem_added, self.solver_added, self.macros_added, self.run_button_added, self.clear_button_added, self.postprocess_button_added, self.plot_button_added]
         self.widget_meta_list.insert(row_num-1,self.widget_row_meta)
         self.meta_experiment_master_list.insert(row_num-1,self.cross_app.crossdesign_MetaExperiment)
         # self.select_checkbox.deselect()
@@ -1681,803 +1642,123 @@ class Experiment_Window(tk.Tk):
         self.postrep_window.geometry("610x350")
         self.postrep_window.title("Post-Normalization Page")
         self.app = Post_Normal_Window(self.postrep_window, self.post_norm_exp_list, self)
-        # experiment_base.post_normalize(self.post_norm_exp_list, n_postreps_init_opt, crn_across_init_opt=True, proxy_init_val=None, proxy_opt_val=None, proxy_opt_x=None)
+        # wrapper_base.post_normalize(self.post_norm_exp_list, n_postreps_init_opt, crn_across_init_opt=True, proxy_init_val=None, proxy_opt_val=None, proxy_opt_x=None)
 
     def post_norm_return_func(self):
         #('IN post_process_disable_button ', self.post_rep_function_row_index)
         print("youve returned")
-    
-    def make_meta_experiment_func(self):
-        self.list_checked_experiments = []
-        self.list_unique_solver = []
-        self.list_unique_problems = []
-        self.list_missing_experiments  = []
-        
-
-        message2 = "There are experiments missing, would you like to add them?"
-        response = tk.messagebox.askyesno(title = "Make meta Experiemnts",message = message2)
-
-        if response == True:
-            for index, checkbox in enumerate(self.check_box_list_var):
-                if checkbox.get() == True:
-                    index = self.check_box_list_var.index(checkbox)
-                    experiment_checked = self.experiment_object_list[index] ## Is this right?
-                    self.list_checked_experiments.append(experiment_checked)
-                    print("checkbox",checkbox.get())
-                    print("experiment_checked:", experiment_checked )
-                    # Making the checkbox in the Queue of Porblem-Solver Groups disabled
-                    check_box_object = self.check_box_list[index]
-                    check_box_object["state"] = "disabled"
-            self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments  =  experiment_base.find_missing_experiments(self.list_checked_experiments)
-            self.meta_experiment_created = experiment_base.make_full_metaexperiment(self.list_checked_experiments,self.list_unique_solver,self.list_unique_problems,self.list_missing_experiments)
-            
-            self.add_meta_exp_to_frame(n_macroreps = None, input_meta_experiment=self.meta_experiment_created)
-            self.meta_experiment_problem_solver_list(self.meta_experiment_created)
-
-    def meta_experiment_problem_solver_list(self, metaExperiment):
-        self.list_meta_experiment_problems = []
-        self.list_meta_experiment_solvers = []
-
-        self.list_meta_experiment_problems_object = []
-        self.list_meta_experiment_solvers_object = []
-        
-        self.list_meta_experiment_problems = metaExperiment.problem_names
-        print("self.list_meta_experiment_problems", self.list_meta_experiment_problems)
-        self.list_meta_experiment_solvers = metaExperiment.solver_names
-        print("self.list_meta_experiment_solvers", self.list_meta_experiment_solvers)
-
-        self.list_meta_experiment_problems_object =  metaExperiment.problems
-        print("self.list_meta_experiment_problems_object", self.list_meta_experiment_problems_object)
-        self.list_meta_experiment_solvers_object =  metaExperiment.solvers
-        print("self.list_meta_experiment_solvers_object", self.list_meta_experiment_solvers_object)
-
-    def view_meta_function(self, row_num):
-        row_index = row_num
-        self.problem_menu.destroy()
-        self.problem_label.destroy()
-        self.solver_menu.destroy()
-        self.solver_label.destroy()
-
-        self.problem_label2 = tk.Label(master=self.master, 
-                            text = "Meta Problem(s):*",
-                            font = "Calibri 13")
-
-      
-        
-        
-        self.problem_var2 = tk.StringVar(master=self.master)
-        
-        
-        self.problem_menu2 = ttk.OptionMenu(self.master, self.problem_var2, "Problem", *self.list_meta_experiment_problems, command=self.show_problem_factors2)
-
-        self.problem_label2.place(relx=.35, rely=.1)
-        self.problem_menu2.place(relx=.45, rely=.1)
-        self.solver_label2 = tk.Label(master=self.master, 
-                            text = "Meta Solver(s):*",
-                
-                            font = "Calibri 13")
-        self.solver_var2 = tk.StringVar(master=self.master)
-    
-        self.solver_menu2 = ttk.OptionMenu(self.master, self.solver_var2, "Solver", *self.list_meta_experiment_solvers, command=self.show_solver_factors2)
-        
-        self.solver_label2.place(relx=.01, rely=.1)
-        self.solver_menu2.place(relx=.1, rely=.1 )
-
-        view_button_added = self.widget_meta_list[row_index-1][7]
-        view_button_added["text"] = "Exit View Meta"
-        view_button_added["command"] = partial(self.exit_meta_view, row_index)
-        view_button_added.grid(row= (row_index), column=7, sticky='nsew', padx=10, pady=3)
-
-        self.add_button["state"] = "disabled"
-
-    def exit_meta_view(self, row_index):
-        self.add_button["state"] = "normal"
-        self.problem_menu2.destroy()
-        self.problem_label2.destroy()
-        self.solver_menu2.destroy()
-        self.solver_label2.destroy()
-        self.factor_label_frame_solver.destroy()
-        self.factor_label_frame_oracle.destroy()
-        self.factor_label_frame_problem.destroy()
-        self.problem_label = tk.Label(master=self.master, # window label is used in
-                        text = "Select Problem:",
-                        font = "Calibri 13")
-        self.problem_var = tk.StringVar(master=self.master)
-        self.problem_menu = ttk.OptionMenu(self.master, self.problem_var, "Problem", *self.problem_list, command=self.show_problem_factors)
-
-        self.problem_label.place(relx=.35, rely=.1)
-        self.problem_menu.place(relx=.45, rely=.1)
-        self.solver_label = tk.Label(master=self.master, # window label is used in
-                            text = "Select Solver(s):*",
-                            font = "Calibri 13")
-        self.solver_var = tk.StringVar(master=self.master)
-        self.solver_menu = ttk.OptionMenu(self.master, self.solver_var, "Solver", *self.solver_list, command=self.show_solver_factors)
-        
-        self.solver_label.place(relx=.01, rely=.1)
-        self.solver_menu.place(relx=.1, rely=.1 )
-
-        view_button_added = self.widget_meta_list[row_index-1][7]
-        view_button_added["text"] = "View Problem-Solver Groups"
-        view_button_added["command"] = partial(self.view_meta_function, row_index)
-        view_button_added.grid(row= (row_index), column=7, sticky='nsew', padx=10, pady=3)
-
-    def show_solver_factors2(self, *args):
-        self.factor_label_frame_solver.destroy()
-        self.factor_label_frame_oracle.destroy()
-        
-        self.solver_factors_list = []
-        self.solver_factors_types = []
-
-        self.factor_label_frame_solver = ttk.LabelFrame(master=self.master, text="Solver Factors")
-
-        self.factor_canvas_solver = tk.Canvas(master=self.factor_label_frame_solver, borderwidth=0)
-
-        self.factor_frame_solver = ttk.Frame(master=self.factor_canvas_solver)
-        self.vert_scroll_bar_factor_solver = Scrollbar(self.factor_label_frame_solver, orient="vertical", command=self.factor_canvas_solver.yview)
-        self.factor_canvas_solver.configure(yscrollcommand=self.vert_scroll_bar_factor_solver.set)
-
-        self.horiz_scroll_bar_factor_solver = Scrollbar(self.factor_label_frame_solver, orient="horizontal", command=self.factor_canvas_solver.xview)
-        self.factor_canvas_solver.configure(xscrollcommand=self.horiz_scroll_bar_factor_solver.set)
-
-        self.vert_scroll_bar_factor_solver.pack(side="right", fill="y")
-        self.horiz_scroll_bar_factor_solver.pack(side="bottom", fill="x")
-
-        self.factor_canvas_solver.pack(side="left", fill="both", expand=True)
-        self.factor_canvas_solver.create_window((0,0), window=self.factor_frame_solver, anchor="nw",
-                                  tags="self.factor_frame_solver")
-
-        self.factor_frame_solver.bind("<Configure>", self.onFrameConfigure_factor_solver)
-
-        self.factor_notebook_solver = ttk.Notebook(master=self.factor_frame_solver)
-        self.factor_notebook_solver.pack(fill="both")
-
-        self.factor_tab_one_solver = tk.Frame(master=self.factor_notebook_solver)
-
-        self.factor_notebook_solver.add(self.factor_tab_one_solver, text=str(self.solver_var2.get()) + " Factors")
-
-        self.factor_tab_one_solver.grid_rowconfigure(0)
-
-        self.factor_heading_list_solver = ["Description", "Input"]
-
-        for heading in self.factor_heading_list_solver:
-            self.factor_tab_one_solver.grid_columnconfigure(self.factor_heading_list_solver.index(heading))
-            label = tk.Label(master=self.factor_tab_one_solver, text=heading, font="Calibri 14 bold")
-            label.grid(row=0, column=self.factor_heading_list_solver.index(heading), padx=10, pady=3)
-
-        print("self.solver_var2.get",self.solver_var2.get())
-        self.solver_object = solver_directory[self.solver_var2.get()]
-
-        count_factors_solver = 1
-        for factor_type in self.solver_object().specifications:
-            #("size of dictionary", len(self.solver_object().specifications[factor_type]))
-            #("first", factor_type)
-            #("second", self.solver_object().specifications[factor_type].get("description"))
-            #("third", self.solver_object().specifications[factor_type].get("datatype"))
-            #("fourth", self.solver_object().specifications[factor_type].get("default"))
-
-            self.dictionary_size_solver = len(self.solver_object().specifications[factor_type])
-
-            if self.solver_object().specifications[factor_type].get("datatype") != bool:
-
-                self.int_float_description = tk.Label(master=self.factor_tab_one_solver,
-                                                    text = str(self.solver_object().specifications[factor_type].get("description")),
-                                                    font = "Calibri 13",
-                                                    wraplength=200)
-
-                self.int_float_var = tk.StringVar(self.factor_tab_one_solver)
-                self.int_float_entry = ttk.Entry(master=self.factor_tab_one_solver, textvariable = self.int_float_var, justify = tk.LEFT, width=15, state = "disabled")
-                
-                if args and len(args) == 3 and args[0] == True:
-                    self.int_float_entry.insert(index=tk.END, string=str(args[1][5][0][factor_type]))
-                else:
-                    self.int_float_entry.insert(index=tk.END, string=str(self.solver_object().specifications[factor_type].get("default")))
-
-                # self.int_float_datatype = tk.Label(master=self.factor_tab_one,
-                #                                     text = str(self.solver_object().specifications[factor_type].get("datatype")),
-                #                                     font = "Calibri 13")
-
-                self.int_float_description.grid(row=count_factors_solver, column=0, sticky='nsew')
-                self.int_float_entry.grid(row=count_factors_solver, column=1, sticky='nsew')
-                # self.int_float_datatype.grid(row=count_factors_solver, column=2, sticky='nsew')
-
-                self.solver_factors_list.append(self.int_float_var)
-
-                datatype = self.solver_object().specifications[factor_type].get("datatype")
-                
-                if datatype != tuple:
-                    self.solver_factors_types.append(datatype)
-                else:
-                    self.solver_factors_types.append(str)
-
-                count_factors_solver += 1
-
-
-            if self.solver_object().specifications[factor_type].get("datatype") == bool:
-
-                self.boolean_description = tk.Label(master=self.factor_tab_one_solver,
-                                                    text = str(self.solver_object().specifications[factor_type].get("description")),
-                                                    font = "Calibri 13",
-                                                    wraplength=200)
-
-                self.boolean_list = ["True", "False"]
-                self.boolean_var = tk.StringVar(self.factor_tab_one_solver)
-
-               # self.boolean_menu = ttk.OptionMenu(self.factor_tab_one_solver, self.boolean_var, str(self.solver_object().specifications[factor_type].get("default")), *self.boolean_list)
-
-                if args and len(args) == 3 and args[0] == True:
-                    self.boolean_menu = ttk.OptionMenu(self.factor_tab_one_solver, self.boolean_var, str(args[1][5][0][factor_type]), *self.boolean_list)
-                else:
-                    self.boolean_menu = ttk.OptionMenu(self.factor_tab_one_solver, self.boolean_var, str(self.solver_object().specifications[factor_type].get("default")), *self.boolean_list)
-
-
-                self.boolean_description.grid(row=count_factors_solver, column=0, sticky='nsew')
-                self.boolean_menu.grid(row=count_factors_solver, column=1, sticky='nsew')
-                # self.boolean_datatype.grid(row=count_factors_solver, column=2, sticky='nsew')
-
-                self.solver_factors_list.append(self.boolean_var)
-
-                datatype = self.solver_object().specifications[factor_type].get("datatype")
-                self.solver_factors_types.append(datatype)
-
-                count_factors_solver += 1
-
-        count_factors_solver += 1
-
-        self.save_label_solver = tk.Label(master=self.factor_tab_one_solver,
-                                            text = "Save Solver As",
-                                            font = "Calibri 13")
-
-                                  
-        if args and len(args) == 3 and args[0] == True:
-            oldname = args[1][5][1]
-            
-        else:
-            solver_object = solver_directory[self.solver_var2.get()]
-            oldname = solver_object().name
-            
-
-        self.save_var_solver = tk.StringVar(self.factor_tab_one_solver)
-        self.save_entry_solver = ttk.Entry(master=self.factor_tab_one_solver, textvariable = self.save_var_solver, justify = tk.LEFT, width=15, state = "disabled")
-        
-
-        self.save_entry_solver.insert(index=tk.END, string=oldname)
-
-        self.save_label_solver.grid(row=count_factors_solver, column=0, sticky='nsew')
-        self.save_entry_solver.grid(row=count_factors_solver, column=1, sticky='nsew')
-
-        self.solver_factors_list.append(self.save_var_solver)
-
-        self.solver_factors_types.append(str)
-        # self.factor_label_frame_problem.place(relx=.32, y=70, height=150, relwidth=.34)
-        self.factor_label_frame_solver.place(x=10, rely=.15, relheight=.33, relwidth=.34)
-        if str(self.problem_var.get()) != "Problem":
-            self.add_button.place(x=10, rely=.48, width=200, height=30)
-    
-    #Creates a function that checks the compatibility of the solver picked with the list of problems and adds
-    #the compatible problems to a new list 
-
-    def show_problem_factors2(self, *args):
-        self.factor_label_frame_problem.destroy()
-        self.problem_factors_list = []
-        self.problem_factors_types = []
-
-        self.factor_label_frame_problem = ttk.LabelFrame(master=self.master, text="Problem Factors")
-
-        self.factor_canvas_problem = tk.Canvas(master=self.factor_label_frame_problem, borderwidth=0)
-
-        self.factor_frame_problem = ttk.Frame(master=self.factor_canvas_problem)
-        self.vert_scroll_bar_factor_problem = Scrollbar(self.factor_label_frame_problem, orient="vertical", command=self.factor_canvas_problem.yview)
-        self.factor_canvas_problem.configure(yscrollcommand=self.vert_scroll_bar_factor_problem.set)
-
-        self.horiz_scroll_bar_factor_problem = Scrollbar(self.factor_label_frame_problem, orient="horizontal", command=self.factor_canvas_problem.xview)
-        self.factor_canvas_problem.configure(xscrollcommand=self.horiz_scroll_bar_factor_problem.set)
-
-        self.vert_scroll_bar_factor_problem.pack(side="right", fill="y")
-        self.horiz_scroll_bar_factor_problem.pack(side="bottom", fill="x")
-
-        self.factor_canvas_problem.pack(side="left", fill="both", expand=True)
-        self.factor_canvas_problem.create_window((0,0), window=self.factor_frame_problem, anchor="nw",
-                                  tags="self.factor_frame_problem")
-
-        self.factor_frame_problem.bind("<Configure>", self.onFrameConfigure_factor_problem)
-
-        self.factor_notebook_problem = ttk.Notebook(master=self.factor_frame_problem)
-        self.factor_notebook_problem.pack(fill="both")
-
-        self.factor_tab_one_problem = tk.Frame(master=self.factor_notebook_problem)
-
-        self.factor_notebook_problem.add(self.factor_tab_one_problem, text=str(self.problem_var2.get()) + " Factors")
-
-        self.factor_tab_one_problem.grid_rowconfigure(0)
-
-        self.factor_heading_list_problem = ["Description", "Input"]
-
-        for heading in self.factor_heading_list_problem:
-            self.factor_tab_one_problem.grid_columnconfigure(self.factor_heading_list_problem.index(heading))
-            label_problem = tk.Label(master=self.factor_tab_one_problem, text=heading, font="Calibri 14 bold")
-            label_problem.grid(row=0, column=self.factor_heading_list_problem.index(heading), padx=10, pady=3)
-
-        for problems in self.list_meta_experiment_problems_object:
-            if problems.name == self.problem_var2.get():
-                self.problem_object = problems
-            
-        count_factors_problem = 1
-        for num, factor_type in enumerate(self.problem_object.specifications, start=0):
-            #(factor_type, len(self.problem_object().specifications[factor_type]['default']) )
-
-            self.dictionary_size_problem = len(self.problem_object.specifications[factor_type])
-
-            if self.problem_object.specifications[factor_type].get("datatype") != bool:
-
-
-                self.int_float_description_problem = tk.Label(master=self.factor_tab_one_problem,
-                                                    text = str(self.problem_object.specifications[factor_type].get("description")),
-                                                    font = "Calibri 13",
-                                                    wraplength=200)
-
-                self.int_float_var_problem = tk.StringVar(self.factor_tab_one_problem)
-                self.int_float_entry_problem = ttk.Entry(master=self.factor_tab_one_problem, textvariable = self.int_float_var_problem, justify = tk.LEFT)
-                if args and len(args) == 2 and args[0] == True:
-                    self.int_float_entry_problem.insert(index=tk.END, string=str(args[1][3][0][factor_type]))
-                elif self.problem_object.specifications[factor_type].get("datatype") == tuple and len(self.problem_object.specifications[factor_type]['default']) == 1:
-                    #(factor_type, len(self.problem_object().specifications[factor_type]['default']) )
-                    # self.int_float_entry_problem.insert(index=tk.END, string=str(self.problem_object().specifications[factor_type].get("default")))
-                    self.int_float_entry_problem.insert(index=tk.END, string=str(self.problem_object.specifications[factor_type].get("default")[0]))
-                else:
-                    self.int_float_entry_problem.insert(index=tk.END, string=str(self.problem_object.specifications[factor_type].get("default")))
-
-                self.int_float_description_problem.grid(row=count_factors_problem, column=0, sticky='nsew')
-                self.int_float_entry_problem.grid(row=count_factors_problem, column=1, sticky='nsew')
-
-                self.problem_factors_list.append(self.int_float_var_problem)
-                datatype = self.problem_object.specifications[factor_type].get("datatype")
-                if datatype != tuple:
-                    self.problem_factors_types.append(datatype)
-                else:
-                    self.problem_factors_types.append(str)
-
-                
-
-                count_factors_problem += 1
-
-
-            if self.problem_object.specifications[factor_type].get("datatype") == bool:
-
-                self.boolean_description_problem = tk.Label(master=self.factor_tab_one_problem,
-                                                    text = str(self.problem_object().specifications[factor_type].get("description")),
-                                                    font = "Calibri 13",
-                                                    wraplength=200)
-
-                self.boolean_list_problem = ["True", "False"]
-                self.boolean_var_problem = tk.StringVar(self.factor_tab_one_problem)
-
-                self.boolean_menu_problem = ttk.OptionMenu(self.factor_tab_one_problem, self.boolean_var_problem, str(self.problem_object().specifications[factor_type].get("default")), *self.boolean_list)
-
-                self.boolean_description_problem.grid(row=count_factors_problem, column=0, sticky='nsew')
-                self.boolean_menu_problem.grid(row=count_factors_problem, column=1, sticky='nsew')
-                # self.boolean_datatype_problem.grid(row=count_factors, column=2, sticky='nsew')
-
-                datatype = self.problem_object().specifications[factor_type].get("datatype")
-
-                self.problem_factors_list.append(self.boolean_var_problem)
-                self.problem_factors_types.append(datatype)
-
-                count_factors_problem += 1
-
-        count_factors_problem += 1
-        
-        
-        oldname = self.problem_object.name
-            
-
-        self.save_label_problem = tk.Label(master=self.factor_tab_one_problem,
-                                            text = "Save Problem As",
-                                            font = "Calibri 13")
-
-        self.save_var_problem = tk.StringVar(self.factor_tab_one_problem)
-        self.save_entry_problem = ttk.Entry(master=self.factor_tab_one_problem, textvariable = self.save_var_problem, justify = tk.LEFT)
-        
-        self.save_entry_problem.insert(index=tk.END, string=oldname)
-
-        self.save_label_problem.grid(row=count_factors_problem, column=0, sticky='nsew')
-        self.save_entry_problem.grid(row=count_factors_problem, column=1, sticky='nsew')
-
-        self.problem_factors_list.append(self.save_var_problem)
-        self.problem_factors_types.append(str)
-
-        #self.factor_label_frame_problem.place(x=400, y=70, height=300, width=475)
-        self.factor_label_frame_problem.place(relx=.35, rely=.15, relheight=.33, relwidth=.34)
-
-        # Switching from Problems to Oracles
-
-        self.oracle_factors_list = []
-        self.oracle_factors_types = []
-
-
-        ## Rina Adding After this 
-        problem = str(self.problem_var2.get())  
-        self.oracle = problem.split("-") 
-        self.oracle = self.oracle[0] 
-        self.oracle_object = model_directory[self.oracle] 
-        
-        ## Stop adding for Rina  
-    
-        self.factor_label_frame_oracle = ttk.LabelFrame(master=self.master, text="Model Factors")
-
-        self.factor_canvas_oracle = tk.Canvas(master=self.factor_label_frame_oracle, borderwidth=0)
-
-        self.factor_frame_oracle = ttk.Frame(master=self.factor_canvas_oracle)
-        self.vert_scroll_bar_factor_oracle = Scrollbar(self.factor_label_frame_oracle, orient="vertical", command=self.factor_canvas_oracle.yview)
-        self.factor_canvas_oracle.configure(yscrollcommand=self.vert_scroll_bar_factor_oracle.set)
-
-        self.horiz_scroll_bar_factor_oracle = Scrollbar(self.factor_label_frame_oracle, orient="horizontal", command=self.factor_canvas_oracle.xview)
-        self.factor_canvas_oracle.configure(xscrollcommand=self.horiz_scroll_bar_factor_oracle.set)
-
-        self.vert_scroll_bar_factor_oracle.pack(side="right", fill="y")
-        self.horiz_scroll_bar_factor_oracle.pack(side="bottom", fill="x")
-
-        self.factor_canvas_oracle.pack(side="left", fill="both", expand=True)
-        self.factor_canvas_oracle.create_window((0,0), window=self.factor_frame_oracle, anchor="nw",
-                                  tags="self.factor_frame_oracle")
-
-        self.factor_frame_oracle.bind("<Configure>", self.onFrameConfigure_factor_oracle)
-
-        self.factor_notebook_oracle = ttk.Notebook(master=self.factor_frame_oracle)
-        self.factor_notebook_oracle.pack(fill="both")
-
-        self.factor_tab_one_oracle = tk.Frame(master=self.factor_notebook_oracle)
-
-        self.factor_notebook_oracle.add(self.factor_tab_one_oracle, text=str(self.oracle + " Factors"))
-
-        self.factor_tab_one_oracle.grid_rowconfigure(0)
-
-        self.factor_heading_list_oracle = ["Description", "Input"]
-
-        for heading in self.factor_heading_list_oracle:
-            self.factor_tab_one_oracle.grid_columnconfigure(self.factor_heading_list_oracle.index(heading))
-            label_oracle = tk.Label(master=self.factor_tab_one_oracle, text=heading, font="Calibri 14 bold")
-            label_oracle.grid(row=0, column=self.factor_heading_list_oracle.index(heading), padx=10, pady=3)
-
-
-        count_factors_oracle = 1
-        for factor_type in self.oracle_object().specifications:
-
-            self.dictionary_size_oracle = len(self.oracle_object().specifications[factor_type])
-
-            if self.oracle_object().specifications[factor_type].get("datatype") != bool:
-
-                #("yes?")
-                self.int_float_description_oracle = tk.Label(master=self.factor_tab_one_oracle,
-                                                    text = str(self.oracle_object().specifications[factor_type].get("description")),
-                                                    font = "Calibri 13",
-                                                    wraplength=200)
-
-                self.int_float_var_oracle = tk.StringVar(self.factor_tab_one_oracle)
-                self.int_float_entry_oracle = ttk.Entry(master=self.factor_tab_one_oracle, textvariable = self.int_float_var_oracle, justify = tk.LEFT, width = 20)
-
-                if args and len(args) == 2 and args[0] == True:
-                    self.int_float_entry_oracle.insert(index=tk.END, string=str(args[1][4][0][factor_type]))
-                else:
-                    self.int_float_entry_oracle.insert(index=tk.END, string=str(self.oracle_object().specifications[factor_type].get("default")))
-
-                self.int_float_description_oracle.grid(row=count_factors_oracle, column=0, sticky='nsew')
-                self.int_float_entry_oracle.grid(row=count_factors_oracle, column=1, sticky='nsew')
-
-                self.oracle_factors_list.append(self.int_float_var_oracle)
-
-                datatype = self.oracle_object().specifications[factor_type].get("datatype")
-                if datatype != tuple:
-                    self.oracle_factors_types.append(datatype)
-                else:
-                    self.oracle_factors_types.append(str)
-
-                count_factors_oracle += 1
-
-
-            if self.oracle_object().specifications[factor_type].get("datatype") == bool:
-
-                #("yes!")
-                self.boolean_description_oracle = tk.Label(master=self.factor_tab_one_oracle,
-                                                    text = str(self.oracle_object().specifications[factor_type].get("description")),
-                                                    font = "Calibri 13",
-                                                    wraplength=200)
-
-                self.boolean_list_oracle = ["True", "False"]
-                self.boolean_var_oracle = tk.StringVar(self.factor_tab_one_oracle)
-
-                self.boolean_menu_oracle = ttk.OptionMenu(self.factor_tab_one_oracle, self.boolean_var_oracle, str(self.oracle_object().specifications[factor_type].get("default")), *self.boolean_list)
-
-                # self.boolean_datatype_oracle = tk.Label(master=self.factor_tab_one,
-                #                                     text = str(self.oracle_object().specifications[factor_type].get("datatype")),
-                #                                     font = "Calibri 13")
-
-                self.boolean_description_oracle.grid(row=count_factors_oracle, column=0, sticky='nsew')
-                self.boolean_menu_oracle.grid(row=count_factors_oracle, column=1, sticky='nsew')
-                # self.boolean_datatype_oracle.grid(row=count_factors, column=2, sticky='nsew')
-
-                self.oracle_factors_list.append(self.boolean_var_oracle)
-
-                datatype = self.oracle_object().specifications[factor_type].get("datatype")
-                self.oracle_factors_types.append(datatype)
-
-                count_factors_oracle += 1
-
-        #(self.oracle_factors_list)
-        # relx=.32, rely=.08, relheight=.2, relwidth=.34
-
-        self.factor_label_frame_oracle.place(relx=.7, rely=.15, relheight=.33, relwidth=.3)
-        if str(self.solver_var.get()) != "Solver":
-            self.add_button.place(x=10, rely=.48, width=200, height=30)
-
-    def show_solver_factors(self, *args):
-        
-        if args and len(args) == 3 and args[2] == False:
-            pass
-        else:
-            self.update_problem_list_compatability()
-
-        self.solver_factors_list = []
-        self.solver_factors_types = []
-
-        self.factor_label_frame_solver = ttk.LabelFrame(master=self.master, text="Solver Factors")
-
-        self.factor_canvas_solver = tk.Canvas(master=self.factor_label_frame_solver, borderwidth=0)
-
-        self.factor_frame_solver = ttk.Frame(master=self.factor_canvas_solver)
-        self.vert_scroll_bar_factor_solver = Scrollbar(self.factor_label_frame_solver, orient="vertical", command=self.factor_canvas_solver.yview)
-        self.factor_canvas_solver.configure(yscrollcommand=self.vert_scroll_bar_factor_solver.set)
-
-        self.horiz_scroll_bar_factor_solver = Scrollbar(self.factor_label_frame_solver, orient="horizontal", command=self.factor_canvas_solver.xview)
-        self.factor_canvas_solver.configure(xscrollcommand=self.horiz_scroll_bar_factor_solver.set)
-
-        self.vert_scroll_bar_factor_solver.pack(side="right", fill="y")
-        self.horiz_scroll_bar_factor_solver.pack(side="bottom", fill="x")
-
-        self.factor_canvas_solver.pack(side="left", fill="both", expand=True)
-        self.factor_canvas_solver.create_window((0,0), window=self.factor_frame_solver, anchor="nw",
-                                  tags="self.factor_frame_solver")
-
-        self.factor_frame_solver.bind("<Configure>", self.onFrameConfigure_factor_solver)
-
-        self.factor_notebook_solver = ttk.Notebook(master=self.factor_frame_solver)
-        self.factor_notebook_solver.pack(fill="both")
-
-        self.factor_tab_one_solver = tk.Frame(master=self.factor_notebook_solver)
-
-        self.factor_notebook_solver.add(self.factor_tab_one_solver, text=str(self.solver_var.get()) + " Factors")
-
-        self.factor_tab_one_solver.grid_rowconfigure(0)
-
-        self.factor_heading_list_solver = ["Description", "Input"]
-
-        for heading in self.factor_heading_list_solver:
-            self.factor_tab_one_solver.grid_columnconfigure(self.factor_heading_list_solver.index(heading))
-            label = tk.Label(master=self.factor_tab_one_solver, text=heading, font="Calibri 14 bold")
-            label.grid(row=0, column=self.factor_heading_list_solver.index(heading), padx=10, pady=3)
-
-        self.solver_object = solver_nonabbreviated_directory[self.solver_var.get()]
-
-        count_factors_solver = 1
-        for factor_type in self.solver_object().specifications:
-            #("size of dictionary", len(self.solver_object().specifications[factor_type]))
-            #("first", factor_type)
-            #("second", self.solver_object().specifications[factor_type].get("description"))
-            #("third", self.solver_object().specifications[factor_type].get("datatype"))
-            #("fourth", self.solver_object().specifications[factor_type].get("default"))
-
-            self.dictionary_size_solver = len(self.solver_object().specifications[factor_type])
-
-            if self.solver_object().specifications[factor_type].get("datatype") != bool:
-
-                self.int_float_description = tk.Label(master=self.factor_tab_one_solver,
-                                                    text = str(self.solver_object().specifications[factor_type].get("description")),
-                                                    font = "Calibri 13",
-                                                    wraplength=200)
-
-                self.int_float_var = tk.StringVar(self.factor_tab_one_solver)
-                self.int_float_entry = ttk.Entry(master=self.factor_tab_one_solver, textvariable = self.int_float_var, justify = tk.LEFT, width=15)
-                
-                if args and len(args) == 3 and args[0] == True:
-                    self.int_float_entry.insert(index=tk.END, string=str(args[1][5][0][factor_type]))
-                else:
-                    self.int_float_entry.insert(index=tk.END, string=str(self.solver_object().specifications[factor_type].get("default")))
-
-                # self.int_float_datatype = tk.Label(master=self.factor_tab_one,
-                #                                     text = str(self.solver_object().specifications[factor_type].get("datatype")),
-                #                                     font = "Calibri 13")
-
-                self.int_float_description.grid(row=count_factors_solver, column=0, sticky='nsew')
-                self.int_float_entry.grid(row=count_factors_solver, column=1, sticky='nsew')
-                # self.int_float_datatype.grid(row=count_factors_solver, column=2, sticky='nsew')
-
-                self.solver_factors_list.append(self.int_float_var)
-
-                datatype = self.solver_object().specifications[factor_type].get("datatype")
-                
-                if datatype != tuple:
-                    self.solver_factors_types.append(datatype)
-                else:
-                    self.solver_factors_types.append(str)
-
-                count_factors_solver += 1
-
-
-            if self.solver_object().specifications[factor_type].get("datatype") == bool:
-
-                self.boolean_description = tk.Label(master=self.factor_tab_one_solver,
-                                                    text = str(self.solver_object().specifications[factor_type].get("description")),
-                                                    font = "Calibri 13",
-                                                    wraplength=200)
-
-                self.boolean_list = ["True", "False"]
-                self.boolean_var = tk.StringVar(self.factor_tab_one_solver)
-
-               # self.boolean_menu = ttk.OptionMenu(self.factor_tab_one_solver, self.boolean_var, str(self.solver_object().specifications[factor_type].get("default")), *self.boolean_list)
-
-                if args and len(args) == 3 and args[0] == True:
-                    self.boolean_menu = ttk.OptionMenu(self.factor_tab_one_solver, self.boolean_var, str(args[1][5][0][factor_type]), *self.boolean_list)
-                else:
-                    self.boolean_menu = ttk.OptionMenu(self.factor_tab_one_solver, self.boolean_var, str(self.solver_object().specifications[factor_type].get("default")), *self.boolean_list)
-
-
-                self.boolean_description.grid(row=count_factors_solver, column=0, sticky='nsew')
-                self.boolean_menu.grid(row=count_factors_solver, column=1, sticky='nsew')
-                # self.boolean_datatype.grid(row=count_factors_solver, column=2, sticky='nsew')
-
-                self.solver_factors_list.append(self.boolean_var)
-
-                datatype = self.solver_object().specifications[factor_type].get("datatype")
-                self.solver_factors_types.append(datatype)
-
-                count_factors_solver += 1
-
-        count_factors_solver += 1
-
-        self.save_label_solver = tk.Label(master=self.factor_tab_one_solver,
-                                            text = "Save Solver As",
-                                            font = "Calibri 13")
-
-                                  
-        if args and len(args) == 3 and args[0] == True:
-            oldname = args[1][5][1]
-            
-        else:
-            solver_object = solver_nonabbreviated_directory[self.solver_var.get()]
-            oldname = solver_object().name
-            
-
-        self.save_var_solver = tk.StringVar(self.factor_tab_one_solver)
-        self.save_entry_solver = ttk.Entry(master=self.factor_tab_one_solver, textvariable = self.save_var_solver, justify = tk.LEFT, width=15)
-        
-
-        self.save_entry_solver.insert(index=tk.END, string=oldname)
-
-        self.save_label_solver.grid(row=count_factors_solver, column=0, sticky='nsew')
-        self.save_entry_solver.grid(row=count_factors_solver, column=1, sticky='nsew')
-
-        self.solver_factors_list.append(self.save_var_solver)
-
-        self.solver_factors_types.append(str)
-        # self.factor_label_frame_problem.place(relx=.32, y=70, height=150, relwidth=.34)
-        self.factor_label_frame_solver.place(x=10, rely=.15, relheight=.33, relwidth=.34)
-        if str(self.problem_var.get()) != "Problem":
-            self.add_button.place(x=10, rely=.48, width=200, height=30)
-                 
 
 class Cross_Design_Window():
+    def __init__(self, master, main_widow):
 
-    def __init__(self, master, main_widow, forced_creation = False):
-        if not forced_creation:
-            self.master = master
-            self.main_window = main_widow
+        self.master = master
+        self.main_window = main_widow
 
-            self.crossdesign_title_label = tk.Label(master=self.master,
-                                                    text = "Create Cross-Design Problem-Solver Group",
-                                                    font = "Calibri 13 bold")
-            self.crossdesign_title_label.place(x=10, y=25)
+        self.crossdesign_title_label = tk.Label(master=self.master,
+                                                text = "Create Cross-Design Experiments",
+                                                font = "Calibri 13 bold")
+        self.crossdesign_title_label.place(x=10, y=25)
 
-            self.crossdesign_problem_label = tk.Label(master=self.master,
-                                                        text = "Select Problems:",
-                                                        font = "Calibri 13")
-            self.crossdesign_problem_label.place(x=145, y=55)
+        self.crossdesign_problem_label = tk.Label(master=self.master,
+                                                    text = "Select Problems:",
+                                                    font = "Calibri 13")
+        self.crossdesign_problem_label.place(x=145, y=55)
 
-            self.crossdesign_solver_label = tk.Label(master=self.master,
-                                                        text = "Select Solvers:",
-                                                        font = "Calibri 13")
-            self.crossdesign_solver_label.place(x=10, y=55)
+        self.crossdesign_solver_label = tk.Label(master=self.master,
+                                                    text = "Select Solvers:",
+                                                    font = "Calibri 13")
+        self.crossdesign_solver_label.place(x=10, y=55)
 
-            self.crossdesign_checkbox_problem_list = []
-            self.crossdesign_checkbox_problem_names = []
-            self.crossdesign_checkbox_solver_list = []
-            self.crossdesign_checkbox_solver_names = []
+        self.crossdesign_checkbox_problem_list = []
+        self.crossdesign_checkbox_problem_names = []
+        self.crossdesign_checkbox_solver_list = []
+        self.crossdesign_checkbox_solver_names = []
 
-            solver_cnt = 0
-            
-            for solver in solver_nonabbreviated_directory:
-                self.crossdesign_solver_checkbox_var = tk.BooleanVar(self.master, value=False)
-                self.crossdesign_solver_checkbox = tk.Checkbutton(master=self.master,
-                                                                text = solver,
-                                                                variable = self.crossdesign_solver_checkbox_var)
-                self.crossdesign_solver_checkbox.place(x=10, y=85+(25*solver_cnt))
+        solver_cnt = 0
+        
+        for solver in solver_nonabbreviated_directory:
+            self.crossdesign_solver_checkbox_var = tk.BooleanVar(self.master, value=False)
+            self.crossdesign_solver_checkbox = tk.Checkbutton(master=self.master,
+                                                            text = solver,
+                                                            variable = self.crossdesign_solver_checkbox_var)
+            self.crossdesign_solver_checkbox.place(x=10, y=85+(25*solver_cnt))
 
-                self.crossdesign_checkbox_solver_list.append(self.crossdesign_solver_checkbox_var)
-                self.crossdesign_checkbox_solver_names.append(solver)
+            self.crossdesign_checkbox_solver_list.append(self.crossdesign_solver_checkbox_var)
+            self.crossdesign_checkbox_solver_names.append(solver)
 
-                solver_cnt += 1
+            solver_cnt += 1
 
-            problem_cnt = 0
-            for problem in problem_nonabbreviated_directory:
-                self.crossdesign_problem_checkbox_var = tk.BooleanVar(self.master, value=False)
-                self.crossdesign_problem_checkbox = tk.Checkbutton(master=self.master,
-                                                    text = problem,
-                                                    variable = self.crossdesign_problem_checkbox_var)
-                self.crossdesign_problem_checkbox.place(x=145, y=85+(25*problem_cnt))
+        problem_cnt = 0
+        for problem in problem_nonabbreviated_directory:
+            self.crossdesign_problem_checkbox_var = tk.BooleanVar(self.master, value=False)
+            self.crossdesign_problem_checkbox = tk.Checkbutton(master=self.master,
+                                                text = problem,
+                                                variable = self.crossdesign_problem_checkbox_var)
+            self.crossdesign_problem_checkbox.place(x=145, y=85+(25*problem_cnt))
 
-                self.crossdesign_checkbox_problem_list.append(self.crossdesign_problem_checkbox_var)
-                self.crossdesign_checkbox_problem_names.append(problem)
+            self.crossdesign_checkbox_problem_list.append(self.crossdesign_problem_checkbox_var)
+            self.crossdesign_checkbox_problem_names.append(problem)
 
-                problem_cnt += 1
+            problem_cnt += 1
 
-            
+        
 
-            if problem_cnt < solver_cnt:
-                solver_cnt += 1
-                self.crossdesign_macro_label = tk.Label(master=self.master,
-                                                        text = "Number of Macroreplications:",
-                                                        font = "Calibri 13")
-                self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
+        if problem_cnt < solver_cnt:
+            solver_cnt += 1
+            self.crossdesign_macro_label = tk.Label(master=self.master,
+                                                    text = "Number of Macroreplications:",
+                                                    font = "Calibri 13")
+            self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
 
-                self.crossdesign_macro_var = tk.StringVar(self.master)
-                self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
-                self.crossdesign_macro_entry.insert(index=tk.END, string="10")
-                self.crossdesign_macro_entry.place(x=15, y=105+(25*solver_cnt))
+            self.crossdesign_macro_var = tk.StringVar(self.master)
+            self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
+            self.crossdesign_macro_entry.insert(index=tk.END, string="10")
+            self.crossdesign_macro_entry.place(x=15, y=105+(25*solver_cnt))
 
-                self.crossdesign_button = ttk.Button(master=self.master,
-                                                text = "Add Cross-Design Problem-Solver Group",
-                                                width = 35,
-                                                command = self.confirm_cross_design_function)
-                self.crossdesign_button.place(x=15, y=135+(25*solver_cnt))
+            self.crossdesign_button = ttk.Button(master=self.master,
+                                            text = "Add Cross-Design Experiments",
+                                            width = 30,
+                                            command = self.confirm_cross_design_function)
+            self.crossdesign_button.place(x=15, y=135+(25*solver_cnt))
 
-            if problem_cnt > solver_cnt:
-                problem_cnt += 1
+        if problem_cnt > solver_cnt:
+            problem_cnt += 1
 
-                self.crossdesign_macro_label = tk.Label(master=self.master,
-                                                        text = "Number of Macroreplications:",
-                                                        font = "Calibri 13")
-                self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
+            self.crossdesign_macro_label = tk.Label(master=self.master,
+                                                    text = "Number of Macroreplications:",
+                                                    font = "Calibri 13")
+            self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
 
-                self.crossdesign_macro_var = tk.StringVar(self.master)
-                self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
-                self.crossdesign_macro_entry.insert(index=tk.END, string="10")
+            self.crossdesign_macro_var = tk.StringVar(self.master)
+            self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
+            self.crossdesign_macro_entry.insert(index=tk.END, string="10")
 
-                self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
+            self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
 
-                self.crossdesign_button = ttk.Button(master=self.master,
-                                                text = "Add Cross-Design Problem-Solver Group",
-                                                width = 30,
-                                                command = self.confirm_cross_design_function)
-                self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
+            self.crossdesign_button = ttk.Button(master=self.master,
+                                            text = "Add Cross-Design Experiments",
+                                            width = 30,
+                                            command = self.confirm_cross_design_function)
+            self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
 
-            if problem_cnt == solver_cnt:
-                problem_cnt += 1
+        if problem_cnt == solver_cnt:
+            problem_cnt += 1
 
-                self.crossdesign_macro_label = tk.Label(master=self.master,
-                                                        text = "Number of Macroreplications:",
-                                                        font = "Calibri 13")
-                self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
+            self.crossdesign_macro_label = tk.Label(master=self.master,
+                                                    text = "Number of Macroreplications:",
+                                                    font = "Calibri 13")
+            self.crossdesign_macro_label.place(x=15, y=80+(25*problem_cnt))
 
-                self.crossdesign_macro_var = tk.StringVar(self.master)
-                self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
-                self.crossdesign_macro_entry.insert(index=tk.END, string="10")
-                self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
+            self.crossdesign_macro_var = tk.StringVar(self.master)
+            self.crossdesign_macro_entry = ttk.Entry(master=self.master, textvariable = self.crossdesign_macro_var, justify = tk.LEFT)
+            self.crossdesign_macro_entry.insert(index=tk.END, string="10")
+            self.crossdesign_macro_entry.place(x=15, y=105+(25*problem_cnt))
 
-                self.crossdesign_button = ttk.Button(master=self.master,
-                                                text = "Add Cross-Design Problem-Solver Group",
-                                                width = 30,
-                                                command = self.confirm_cross_design_function)
-                self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
-            else:
-                print("forced creation of cross design window class")
+            self.crossdesign_button = ttk.Button(master=self.master,
+                                            text = "Add Cross-Design Experiments",
+                                            width = 30,
+                                            command = self.confirm_cross_design_function)
+            self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
 
     def confirm_cross_design_function(self):
         solver_names_list = list(solver_directory.keys())
@@ -2518,8 +1799,8 @@ class Cross_Design_Window():
             return
         # macro_reps = self.crossdesign_macro_var.get()
         #(solver_list, problem_list)
-        # self.crossdesign_ProblemsSolvers = ProblemsSolvers(solver_names=solver_list, problem_names=problem_list, fixed_factors_filename="all_factors")
-        self.crossdesign_ProblemsSolvers = ProblemsSolvers(solver_names=solver_list, problem_names=problem_list)
+        # self.crossdesign_MetaExperiment = MetaExperiment(solver_names=solver_list, problem_names=problem_list, fixed_factors_filename="all_factors")
+        self.crossdesign_MetaExperiment = MetaExperiment(solver_names=solver_list, problem_names=problem_list)
 
         # if self.count_meta_experiment_queue == 0:
         #     self.create_meta_exp_frame()
@@ -2629,13 +1910,13 @@ class Post_Processing_Window():
         self.n_norm_postreps_entry.insert(index=tk.END, string="200")
 
         self.post_processing_run_label = tk.Label(master=self.master, # window label is used for
-                        text = "Complete Post-Processing of the Problem-Solver Pairs",
+                        text = "Complete Post-Processing of the Experiment",
                         font = "Calibri 13",
                         wraplength = "300")
 
         if self.meta:
             self.post_processing_run_label = tk.Label(master=self.master, # window label is used for
-                            text = "Complete Post-Processing and Post-Normalization of the Problem-Solver Pair(s)",
+                            text = "Complete Post-Processing and Post-Normalization of the Experiment(s)",
                             font = "Calibri 13",
                             wraplength = "300")
 
@@ -2721,10 +2002,8 @@ class Post_Processing_Window():
             self.crn_across_macroreps_var.set("False")
 
             self.n_postreps = self.experiment_list[0] # int
-            print("self.n_prostreps", type(self.n_postreps))
             # self.n_postreps_init_opt = self.experiment_list[4] # int
             self.crn_across_budget = self.experiment_list[1] # boolean
-            print("self.n_prostreps", type(self.n_postreps))
             self.crn_across_macroreps = self.experiment_list[2] # boolean
 
             # print("This is the experiment object", self.my_experiment)
@@ -2888,7 +2167,7 @@ class Post_Normal_Window():
         self.n_postreps_init_opt_entry.insert(index=tk.END, string="200")
 
         self.post_processing_run_label = tk.Label(master=self.master, # window label is used for
-                        text = "Complete Post-Normalization of the Problem-Solver Pair(s)",
+                        text = "Complete Post-Normalization of the Experiment(s)",
                         font = "Calibri 13",
                         wraplength = "310")
 
@@ -2939,7 +2218,7 @@ class Post_Normal_Window():
                 proxy_sol = ast.literal_eval(self.proxy_sol.get())
             if self.proxy_var.get() != "":
                 proxy_val = ast.literal_eval(self.proxy_var.get())
-            experiment_base.post_normalize(self.post_norm_exp_list, n_postreps_init_opt, crn_across_init_opt=crn, proxy_init_val=None, proxy_opt_val=proxy_val, proxy_opt_x=proxy_sol)
+            wrapper_base.post_normalize(self.post_norm_exp_list, n_postreps_init_opt, crn_across_init_opt=crn, proxy_init_val=None, proxy_opt_val=proxy_val, proxy_opt_x=proxy_sol)
             # self.master.destroy()
             self.post_processed_bool = True
 
@@ -2982,7 +2261,7 @@ class Plot_Window():
             self.experiment_list = experiment_list
             self.main_window = main_window
             self.plot_types_inputs = ["cdf_solvability", "quantile_solvability","diff_cdf_solvability","diff_quantile_solvability"]
-            self.plot_type_names = ["Mean Progress Curve", "Quantile Progress Curve", "Solve time CDF", "Scatter Plot", "CDF Solvability","Quantile Solvability","CDF Difference Plot", "Quantile Difference Plot", "Terminal Progress Plot", "Area Scatter Plot"]
+            self.plot_type_names = ["Mean Progress Curve", "Quantile Progress Curve", "Solve Time CDF", "Scatter Plot", "CDF Solvability","Quantile Solvability","CDF Difference Plot", "Quantile Difference Plot", "Box Plot", "Terminal Scatter"]
             self.num_plots = 0
             self.plot_exp_list = []
             self.plot_type_list = []
@@ -2993,7 +2272,7 @@ class Plot_Window():
             self.bad_label = None
             self.plot_var = tk.StringVar(master=self.master)
 
-            self.params = [tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master)]
+            self.params = [tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master)]
 
             self.problem_menu = Listbox(self.master,selectmode = "multiple",exportselection=False, width=10,height=6)
             self.solver_menu = Listbox(self.master,selectmode = "multiple",exportselection=False, width=10,height=6)
@@ -3096,11 +2375,11 @@ class Plot_Window():
             self.tab_one = tk.Frame(master=self.notebook)
 
             #
-            self.notebook.add(self.tab_one, text="Problem-Solver Pairs to Plot")
+            self.notebook.add(self.tab_one, text="Experiments to Plot")
 
             self.tab_one.grid_rowconfigure(0)
 
-            self.heading_list = ["Problem", "Solver", "Plot Type", "Remove Row", "View Plot", "Parameters", "PNG File Path"]
+            self.heading_list = ["Problem", "Solver", "Plot Type", "Clear Row", "View Plot", "Parameters", "PNG File Path"]
 
             for heading in self.heading_list:
                 self.tab_one.grid_columnconfigure(self.heading_list.index(heading))
@@ -3119,7 +2398,7 @@ class Plot_Window():
             self.plot_label.place(relx=.4, rely=.08)
             self.plot_menu.place(relx=.55, rely=.08)
 
-            self.add_button.place(relx=.45, rely=.45)
+            self.add_button.place(relx=.4, rely=.38)
 
             separator = ttk.Separator(master=self.master, orient='horizontal')
             separator.place(relx=0.35, rely=.08, relheight=.4)
@@ -3227,7 +2506,6 @@ class Plot_Window():
             param_value_list = []
             for t in self.params:
                 #(t.get())
-                print(t.get())
                 if t.get() == True:
                     param_value_list.append(True)
                 elif t.get() == False:
@@ -3270,45 +2548,40 @@ class Plot_Window():
 
 
             if self.plot_type_list[i] == "Mean Progress Curve":
-                print("n_bootstraps", param_value_list[4])
-                print("conf_level",param_value_list[5])
-                path_name = experiment_base.plot_progress_curves(exp,plot_type="mean", normalize=param_value_list[3], all_in_one=param_value_list[1], plot_CIs=param_value_list[0], print_max_hw=param_value_list[2],n_bootstraps= int(param_value_list[4]), conf_level=param_value_list[5])
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[3],"n_bootstraps":int(param_value_list[4]), "conf_level":param_value_list[5]}
+                path_name = wrapper_base.plot_progress_curves(exp,plot_type="mean", normalize=param_value_list[3], all_in_one=param_value_list[1], plot_CIs=param_value_list[0], print_max_hw=param_value_list[2])
+                print("param_value_list Mean progress Curve ", param_value_list)
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[3]}
             elif self.plot_type_list[i] == "Quantile Progress Curve":
-                print("n_bootstraps", param_value_list[5])
-                print("conf_level",param_value_list[6])
-                path_name = experiment_base.plot_progress_curves(exp,plot_type = "quantile",  beta=param_value_list[3], normalize=param_value_list[4],plot_CIs=param_value_list[0], all_in_one=param_value_list[1], print_max_hw=param_value_list[2],n_bootstraps= int(param_value_list[5]), conf_level=param_value_list[6] )
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[4], "beta":param_value_list[3],"n_bootstraps":param_value_list[5], "conf_level":param_value_list[6]}
-            elif self.plot_type_list[i] == "Solve time CDF":
-                path_name = experiment_base.plot_solvability_cdfs(exp, solve_tol = param_value_list[2], plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], n_bootstraps=int(param_value_list[3]), conf_level=param_value_list[4] )
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"n_bootstraps":param_value_list[3], "conf_level":param_value_list[4]}
+                path_name = wrapper_base.plot_progress_curves(exp,plot_type = "quantile",  beta=param_value_list[3], normalize=param_value_list[4], all_in_one=param_value_list[1],plot_CIs=param_value_list[0], print_max_hw=param_value_list[2])
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[2], "normalize":param_value_list[4], "beta":param_value_list[3]}
+            elif self.plot_type_list[i] == "Solve Time CDF":
+                path_name = wrapper_base.plot_solvability_cdfs(exp, solve_tol = param_value_list[2], plot_CIs=param_value_list[0], print_max_hw=param_value_list[1])
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2]}
             elif self.plot_type_list[i] == "Scatter Plot":
-                path_name = experiment_base.plot_area_scatterplots(exp2, plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], n_bootstraps= int(param_value_list[2]), conf_level=param_value_list[3] )
+                path_name = wrapper_base.plot_area_scatterplots(exp2, plot_CIs=param_value_list[0], print_max_hw=param_value_list[1])
                 param_list = {}
             elif self.plot_type_list[i] == "CDF Solvability":
-                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "cdf_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2],ref_solver=None, n_bootstraps= int(param_value_list[3]), conf_level=param_value_list[4] )
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"n_bootstraps":param_value_list[3], "conf_level":param_value_list[4]}
+                path_name = wrapper_base.plot_solvability_profiles(exp2, plot_type = "cdf_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2],ref_solver=None)
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2]}
             elif self.plot_type_list[i] == "Quantile Solvability":
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol": param_value_list[2], "beta": param_value_list[3],"n_bootstraps":param_value_list[4], "conf_level":param_value_list[5]}
-                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2],beta=param_value_list[3],ref_solver=None, n_bootstraps= int(param_value_list[4]), conf_level=param_value_list[5] )
+                print("Quantile Solvability",param_value_list )
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol": param_value_list[2], "beta": param_value_list[3]}
+                path_name = wrapper_base.plot_solvability_profiles(exp2, plot_type = "quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2],beta=param_value_list[3],ref_solver=None)
             elif self.plot_type_list[i] == "CDF Difference Plot":
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[3],"n_bootstraps":param_value_list[4], "conf_level":param_value_list[5]}
-                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "diff_cdf_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1],solve_tol=param_value_list[2], ref_solver=param_value_list[3], n_bootstraps= int(param_value_list[4]), conf_level=param_value_list[5] )
+                print("param_value_list CDF Difference Plot", param_value_list)
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[3]}
+                path_name = wrapper_base.plot_solvability_profiles(exp2, plot_type = "diff_cdf_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1],solve_tol=param_value_list[2], ref_solver=param_value_list[3])
             elif self.plot_type_list[i] == "Quantile Difference Plot":
-                print("n_bootstraps", param_value_list[5])
-                print("conf_level",param_value_list[6])
-                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[4],"beta":param_value_list[3],"n_bootstraps":param_value_list[5], "conf_level":param_value_list[6]}
-                path_name = experiment_base.plot_solvability_profiles(exp2, plot_type = "diff_quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2], beta=param_value_list[3],ref_solver=param_value_list[4], n_bootstraps= int(param_value_list[5]), conf_level=param_value_list[6] )
-            elif self.plot_type_list[i] == "Terminal Progress Plot":
-                print("plot_type", param_value_list[1])
+                param_list = {"plot CIs":param_value_list[0], "print max hw":param_value_list[1], "solve tol":param_value_list[2],"ref solver":param_value_list[4],"beta":param_value_list[3]}
+                path_name = wrapper_base.plot_solvability_profiles(exp2, plot_type = "diff_quantile_solvability", plot_CIs=param_value_list[0], print_max_hw=param_value_list[1], solve_tol=param_value_list[2], beta=param_value_list[3],ref_solver=param_value_list[4])
+            elif self.plot_type_list[i] == "Box Plot":
                 param_list = {"plot type": param_value_list[1], "normalize":param_value_list[2]}
-                path_name = experiment_base.plot_terminal_progress(exp, plot_type = param_value_list[1], normalize = param_value_list[2], all_in_one =param_value_list[0])
-            elif self.plot_type_list[i] == "Area Scatter Plot":
+                path_name = wrapper_base.plot_terminal_progress(exp, plot_type = param_value_list[1], normalize = param_value_list[2], all_in_one =param_value_list[0])
+            elif self.plot_type_list[i] == "Terminal Scatter":
                 param_list = {}
-                path_name = experiment_base.plot_terminal_scatterplots(exp2, all_in_one = param_value_list[0])
+                path_name = wrapper_base.plot_terminal_scatterplots(exp2, plot_type="terminal_scatter", all_in_one = param_value_list[0])
             else:
                 print(f"{self.plot_type_list[i]} is the plot_type_list at index {i}")
-
 
 
             for i,new_plot in enumerate(path_name):
@@ -3349,7 +2622,7 @@ class Plot_Window():
 
 
                 self.clear_plot = tk.Button(master=self.tab_one,
-                                                        text="Remove",
+                                                        text="Clear",
                                                         font = "Calibri 12",
                                                         justify="center",
                                                         command=partial(self.clear_row, place-1))
@@ -3370,7 +2643,7 @@ class Plot_Window():
                 # self.view_plot.pack()
                 self.changeOnHover(self.view_plot, "red", "yellow")
                 self.all_path_names.append(new_plot)
-                print("all_path_names",self.all_path_names)
+
                 self.num_plots += 1
 
         def changeOnHover(self, button, colorOnHover, colorOnLeave):
@@ -3398,24 +2671,24 @@ class Plot_Window():
 
             # beta=0.50, normalize=True
             if plot_choice == "Mean Progress Curve":
-                param_list = {'normalize':True, 'n_bootstraps': 100, 'conf_level':0.95}
+                param_list = {'normalize':True}
             elif plot_choice == "Quantile Progress Curve":
-                param_list = {'beta':0.50, 'normalize':True, 'n_bootstraps': 100, 'conf_level':0.95}
-            elif plot_choice == "Solve time CDF":
-                param_list = {'solve_tol':0.1, 'n_bootstraps':100, 'conf_level':0.95}
+                param_list = {'beta':0.50, 'normalize':True}
+            elif plot_choice == "Solve Time CDF":
+                param_list = {'solve_tol':0.1}
             elif plot_choice == "Scatter Plot":
-                param_list = { 'n_bootstraps':100, 'conf_level':0.95}
+                param_list = {}
             elif plot_choice == "CDF Solvability":
-                param_list = {'solve_tol':0.1, 'n_bootstraps':100, 'conf_level':0.95}
+                param_list = {'solve_tol':0.1}
             elif plot_choice == "Quantile Solvability":
-                param_list = {'solve_tol':0.1, 'beta':0.5, 'n_bootstraps':100, 'conf_level':0.95}
+                param_list = {'solve_tol':0.1, 'beta':0.5}
             elif plot_choice == "CDF Difference Plot":
-                param_list = {'solve_tol':0.1, 'ref_solver':None, 'n_bootstraps':100, 'conf_level':0.95}
+                param_list = {'solve_tol':0.1, 'ref_solver':None}
             elif plot_choice == "Quantile Difference Plot":
-                param_list = {'solve_tol':0.1, 'beta':0.5, 'ref_solver':None, 'n_bootstraps':100, 'conf_level':0.95}
-            elif plot_choice == "Terminal Progress Plot":
+                param_list = {'solve_tol':0.1, 'beta':0.5, 'ref_solver':None}
+            elif plot_choice == "Box Plot":
                 param_list = {'plot type': "violin", 'normalize': True}
-            elif plot_choice == "Area Scatter Plot":
+            elif plot_choice == "Terminal Scatter":
                 param_list = {}
             else:
                 print("invalid plot?")
@@ -3434,7 +2707,7 @@ class Plot_Window():
                                     tags="self.queue_frame")
             self.CI_canvas.grid_rowconfigure(0)
 
-            self.CI_label_frame.place(relx=.4, rely=.15, relheight=.3, relwidth=.25)
+            self.CI_label_frame.place(relx=.4, rely=.15, relheight=.2, relwidth=.25)
             
             self.settings_label_frame.destroy()
             self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings (Optional)")
@@ -3446,7 +2719,7 @@ class Plot_Window():
                                     tags="self.queue_frame")
             self.settings_canvas.grid_rowconfigure(0)
 
-            self.settings_label_frame.place(relx=.65, rely=.15, relheight=.3, relwidth=.3)
+            self.settings_label_frame.place(relx=.65, rely=.15, relheight=.2, relwidth=.3)
 
             tf_list = ['True','False']
             bp_list = ['violin','box']
@@ -3457,7 +2730,7 @@ class Plot_Window():
             
             # Plot Settings
             i = 0 
-            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
+            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve Time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
                 # Confidence Intervals
                 entry1 = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry1.select()
@@ -3467,7 +2740,7 @@ class Plot_Window():
                 entry1.grid(row=0, column=1, padx=10, pady=3)
                 i += 1
 
-            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice == "Terminal Progress Plot" or plot_choice == "Area Scatter Plot":
+            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice == "Box Plot" or plot_choice == "Terminal Scatter":
                 # Plot Together Checkbox
                 entry = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry.select()
@@ -3477,7 +2750,7 @@ class Plot_Window():
                 entry.grid(row=1, column=1, padx=10, pady=3) 
                 i += 1
             
-            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
+            if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve Time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
                 # Print Max HW
                 entry2 = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry2.select()
@@ -3488,21 +2761,23 @@ class Plot_Window():
             #for item in self.params:
              #   print(f"Item's value: {item.get()} at index {self.params.index(item)} in self.params list")
             
+            
             for param, param_val in param_list.items():
+
                 if param == 'normalize':
                     entry = ttk.OptionMenu(self.CI_canvas, self.params[i], "True", *tf_list)
-                    label = tk.Label(master=self.CI_canvas, text="Normalize By Relative Optimality Gap", font="Calibri 12", wraplength="200")
+                    label = tk.Label(master=self.CI_canvas, text="Normalize By Relative Optimality Gap", font="Calibri 14", wraplength="200")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'ref_solver':
-                    label = tk.Label(master=self.CI_canvas, text="Select Solver", font="Calibri 12")
+                    label = tk.Label(master=self.CI_canvas, text="Select Solver", font="Calibri 14")
                     if len(self.solvers_names) != 0:
-                        label = tk.Label(master=self.CI_canvas, text="Benchmark Solver", font="Calibri 12")
+                        label = tk.Label(master=self.CI_canvas, text="Benchmark Solver", font="Calibri 14")
                         entry = ttk.OptionMenu(self.CI_canvas, self.params[i], self.solvers_names[0], *self.solvers_names)
                         entry.grid(row=i, column=1, padx=10, pady=3)
                     label.grid(row=i, column=0, padx=10, pady=3)
                 elif param == 'solve_tol':
-                    label = tk.Label(master=self.CI_canvas, text="Optimality Gap Threshold", font="Calibri 12", wraplength="100")
+                    label = tk.Label(master=self.CI_canvas, text="Optimality Gap Threshold", font="Calibri 14", wraplength="100")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
@@ -3510,7 +2785,7 @@ class Plot_Window():
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'beta':
-                    label = tk.Label(master=self.CI_canvas, text="Quantile Probability", font="Calibri 12", wraplength="100")
+                    label = tk.Label(master=self.CI_canvas, text="Quantile Probability", font="Calibri 14", wraplength="100")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
@@ -3518,34 +2793,19 @@ class Plot_Window():
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'plot type':
-                    label = tk.Label(master=self.CI_canvas, text="Type of Terminal Progress Plot", font="Calibri 12", wraplength="200")
+                    label = tk.Label(master=self.CI_canvas, text="Type of Box Plot", font="Calibri 14", wraplength="200")
                     entry = ttk.OptionMenu(self.CI_canvas, self.params[i], "violin",*bp_list)
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry.grid(row=i, column=1, padx=10, pady=3)
-                elif param == 'n_bootstraps':
-                    label = tk.Label(master=self.CI_canvas, text="Number of Bootstrap Samples", font="Calibri 12", wraplength="100")
-                    label.grid(row=i, column=0, padx=10, pady=3)
-                    entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
-                    if param_val is not None:
-                        entry.delete(0, 'end')
-                        entry.insert(index=tk.END, string=param_val)
-                    entry.grid(row=i, column=1, padx=10, pady=3)
-                elif param == 'conf_level':
-                    label = tk.Label(master=self.CI_canvas, text="Confidence Level", font="Calibri 12", wraplength="100")
-                    label.grid(row=i, column=0, padx=10, pady=3)
-                    entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
-                    if param_val is not None:
-                        entry.delete(0, 'end')
-                        entry.insert(index=tk.END, string=param_val)
-                    entry.grid(row=i, column=1, padx=10, pady=3)
                 else:
-                    label = tk.Label(master=self.CI_canvas, text=param, font="Calibri 12")
+                    label = tk.Label(master=self.CI_canvas, text=param, font="Calibri 14")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
                         entry.delete(0, 'end')
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
+                
                 i += 1
 
              
