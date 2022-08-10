@@ -45,7 +45,7 @@ solver_directory = {
     "STRONG": STRONG
 }
 solver_nonabbreviated_directory = {
-    "ASTRODF(SDCN)": ASTRODF,
+    "ASTRODF (SDCN)": ASTRODF,
     "Random Search (SSMN)": RandomSearch
 }
 problem_directory = {

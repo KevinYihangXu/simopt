@@ -1764,6 +1764,24 @@ class Experiment_Window(tk.Tk):
 
         self.add_button["state"] = "disabled"
 
+        for i in range(self.count_meta_experiment_queue):
+            self.clear_button_added = self.widget_meta_list[i][4]
+            self.clear_button_added["state"] = "disabled"
+
+        for i in range(self.count_meta_experiment_queue):
+            self.run_button = self.widget_meta_list[i][3]
+            self.run_button["state"] = "disabled"
+
+        for i in range(self.count_meta_experiment_queue):
+            if i != (row_index-1):
+                view_button_added = self.widget_meta_list[i][7]
+                view_button_added["state"] = "disabled"
+
+        self.pickle_file_load_button["state"] = "disabled"
+        self.crossdesign_button["state"] = "disabled"
+        self.tab_one.grid_forget()
+               
+
     def exit_meta_view(self, row_index):
         self.add_button["state"] = "normal"
         self.problem_menu2.destroy()
@@ -1779,8 +1797,8 @@ class Experiment_Window(tk.Tk):
         self.problem_var = tk.StringVar(master=self.master)
         self.problem_menu = ttk.OptionMenu(self.master, self.problem_var, "Problem", *self.problem_list, command=self.show_problem_factors)
 
-        self.problem_label.place(relx=.35, rely=.1)
-        self.problem_menu.place(relx=.45, rely=.1)
+        self.problem_label.place(relx=.3, rely=.1)
+        self.problem_menu.place(relx=.4, rely=.1)
         self.solver_label = tk.Label(master=self.master, # window label is used in
                             text = "Select Solver(s):*",
                             font = "Calibri 13")
@@ -1794,6 +1812,22 @@ class Experiment_Window(tk.Tk):
         view_button_added["text"] = "View Problem-Solver Groups"
         view_button_added["command"] = partial(self.view_meta_function, row_index)
         view_button_added.grid(row= (row_index), column=7, sticky='nsew', padx=10, pady=3)
+
+        for i in range(self.count_meta_experiment_queue):
+            self.clear_button_added = self.widget_meta_list[i][4]
+            self.clear_button_added["state"] = "normal"
+
+        for i in range(self.count_meta_experiment_queue):
+            self.run_button = self.widget_meta_list[i][3]
+            self.run_button["state"] = "normal"
+
+        for i in range(self.count_meta_experiment_queue):
+            if i != (row_index-1):
+                view_button_added = self.widget_meta_list[i][7]
+                view_button_added["state"] = "normal"
+        self.pickle_file_load_button["state"] = "normal"
+        self.crossdesign_button["state"] = "normal"
+        
 
     def show_solver_factors2(self, *args):
         self.factor_label_frame_solver.destroy()
