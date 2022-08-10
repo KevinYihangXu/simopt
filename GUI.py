@@ -2376,7 +2376,7 @@ class Cross_Design_Window():
             self.crossdesign_problem_label = tk.Label(master=self.master,
                                                         text = "Select Problems:",
                                                         font = "Calibri 13")
-            self.crossdesign_problem_label.place(x=145, y=55)
+            self.crossdesign_problem_label.place(x=190, y=55)
 
             self.crossdesign_solver_label = tk.Label(master=self.master,
                                                         text = "Select Solvers:",
@@ -2408,7 +2408,7 @@ class Cross_Design_Window():
                 self.crossdesign_problem_checkbox = tk.Checkbutton(master=self.master,
                                                     text = problem,
                                                     variable = self.crossdesign_problem_checkbox_var)
-                self.crossdesign_problem_checkbox.place(x=145, y=85+(25*problem_cnt))
+                self.crossdesign_problem_checkbox.place(x=190, y=85+(25*problem_cnt))
 
                 self.crossdesign_checkbox_problem_list.append(self.crossdesign_problem_checkbox_var)
                 self.crossdesign_checkbox_problem_names.append(problem)
@@ -2431,7 +2431,7 @@ class Cross_Design_Window():
 
                 self.crossdesign_button = ttk.Button(master=self.master,
                                                 text = "Add Cross-Design Problem-Solver Group",
-                                                width = 35,
+                                                width = 65,
                                                 command = self.confirm_cross_design_function)
                 self.crossdesign_button.place(x=15, y=135+(25*solver_cnt))
 
@@ -2451,7 +2451,7 @@ class Cross_Design_Window():
 
                 self.crossdesign_button = ttk.Button(master=self.master,
                                                 text = "Add Cross-Design Problem-Solver Group",
-                                                width = 30,
+                                                width = 45,
                                                 command = self.confirm_cross_design_function)
                 self.crossdesign_button.place(x=15, y=135+(25*problem_cnt))
 
@@ -2516,7 +2516,7 @@ class Cross_Design_Window():
         # macro_reps = self.crossdesign_macro_var.get()
         #(solver_list, problem_list)
         # self.crossdesign_ProblemsSolvers = ProblemsSolvers(solver_names=solver_list, problem_names=problem_list, fixed_factors_filename="all_factors")
-        self.crossdesign_ProblemsSolvers = ProblemsSolvers(solver_names=solver_list, problem_names=problem_list)
+        self.crossdesign_MetaExperiment = ProblemsSolvers(solver_names=solver_list, problem_names=problem_list)
 
         # if self.count_meta_experiment_queue == 0:
         #     self.create_meta_exp_frame()
