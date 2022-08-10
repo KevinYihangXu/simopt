@@ -62,15 +62,15 @@ be maintained through park facilities, distributed across the attractions.
 
     * Default: 480
 
-* erlang_shape: The shape parameter of the Erlang distribution for attraction
+* erlang_shape: The shape parameter of the Erlang distribution for each attraction
 duration.
 
-    Default: 2
+    Default: [2, 2, 2, 2, 2, 2, 2]
 
-* erlang_rate: The rate parameter of the Erlang distribution for attraction
+* erlang_rate: The rate parameter of the Erlang distribution for each attraction
     duration.
 
-        Default: 9
+        Default: [9, 9, 9, 9, 9, 9, 9]
 
 * depart_probabilities: The probability that a tourist will depart the park
 after visiting an attraction.
