@@ -15,7 +15,7 @@ import pickle
 import importlib
 import time
 
-
+import base
 from rng.mrg32k3a import MRG32k3a
 from base import Solution
 from directory import solver_directory, problem_directory
@@ -744,6 +744,32 @@ class Experiment(object):
         with open(self.file_name_path, "wb") as file:
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
 
+    def log_experiment_results(self):
+        # Create a new text file in experiments/logs folder with correct name.
+        name = self.file_name_path.replace("outputs", "logs")
+        with open(name + ' _experiment_results.txt', 'w') as a:
+            a.write(self.file_name_path)
+            a.write('\n')
+            a.write(f"Solver: {base.solver.name} + \n")
+            a.write(f"Problem: {base.problem.name} + \n")
+            a.write(f"{self.n_macroreps} macroreplications were run.\n")
+            #If results have been postreplicated, list the number of post-replications.
+            if self.check_postreplicate():
+                a.write(f"{self.n_postreps} post replications were run.\n")
+            # If post-normalized, state initial solution (x0) and proxy optimal solution (x_star)
+            # and how many replications were taken of them (n_postreps_init_opt).
+            if self.check_postnormalize():
+                a.write(f"The initial solution is {self.x0}.")
+                a.write(f"The proxy optimal solution is {self.x_star}")
+                a.write(repr(self.n_postreps_init_opt) + 'replications were taken')
+            a.write('Macroreplications:\n')
+            for i in self.all_recommended_xs:
+                a.write(f"\tThe recommended solution at a budget of {self.all_intermediate_budgets[i]} is{self.all_recommended_xs[i]}")
+                a.write(f"\n\t The time taken to complete this macroreplication was {self.timings[i]}.")
+                # If postreplicated, add estimated objective function values
+                if self.check_postreplicate():
+                    a.write(f"The estimated objective function value for this macroreplication is {self.all_est_objectives}.")
+            a.close()
 
 def trim_solver_results(problem, recommended_solns, intermediate_budgets):
     """Trim solutions recommended by solver after problem's max budget.
