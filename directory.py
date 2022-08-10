@@ -45,7 +45,7 @@ solver_directory = {
     "STRONG": STRONG
 }
 solver_nonabbreviated_directory = {
-    "Adaptive Sampling Trust-Region Optimization for Derivative-Free Simulations": ASTRODF,
+    "ASTRODF(SDCN)": ASTRODF,
     "Random Search (SSMN)": RandomSearch
 }
 problem_directory = {

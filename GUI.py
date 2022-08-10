@@ -275,8 +275,8 @@ class Experiment_Window(tk.Tk):
         self.solver_menu.place(relx=.1, rely=.1 )
 
 
-        self.problem_label.place(relx=.35, rely=.1)
-        self.problem_menu.place(relx=.45, rely=.1)
+        self.problem_label.place(relx=.3, rely=.1)
+        self.problem_menu.place(relx=.4, rely=.1)
 
         #self.macro_label.place(relx=.7, rely=.1)
         self.macro_entry.place(relx=.89, rely=.1, width=100)
@@ -764,7 +764,7 @@ class Experiment_Window(tk.Tk):
 
             # creates drop down menu, for tkinter, it is called "OptionMenu"
             self.problem_menu = ttk.OptionMenu(self.master, self.problem_var, "Problem", *self.problem_list, command=self.show_problem_factors)
-            self.problem_menu.place(relx=.45, rely=.1)
+            self.problem_menu.place(relx=.4, rely=.1)
 
     def clearRow_function(self, integer):
 
