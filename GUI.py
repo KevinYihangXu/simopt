@@ -159,19 +159,20 @@ class Experiment_Window(tk.Tk):
                                     command = self.clear_queue)#(self.experiment_added, self.problem_added, self.solver_added, self.macros_added, self.run_button_added))
 
         self.crossdesign_button = ttk.Button(master=self.master,
-                                            text = "Cross-Design Problem-Solver Group",
+                                            text = "Create Problem-Solver Group",
                                             width = 45,
                                             command = self.crossdesign_function)
 
         self.pickle_file_load_button = ttk.Button(master=self.master,
-                                                text = "Load File",
-                                                width = 15,
+                                                text = "Load Problem and Solver Pair",
+                                                width = 50,
                                                 command = self.load_pickle_file_function)
 
         self.attribute_description_label = tk.Label(master=self.master,
-                                                    text = "Attribute Decription Label for problems: Objective(single [S] or multiple [M])    Constraint(Unconstrained [U], Box[B], Determinisitic [D], Stochastic [S]\n Variable(Discrete [D], Continuous [C], Mixed [M])    Gradient (True [T] or False [F])" ,
-                                                    font = "Calibri 9")
-        self.attribute_description_label.place(x= 250, rely = 0.48)
+                                                    text = "Attribute Description Label for Problems: Objective(Single [S] or Multiple [M])                                 Constraint(Unconstrained [U], Box[B], Determinisitic [D], Stochastic [S]\n                       Variable(Discrete [D], Continuous [C], Mixed [M])          Gradient Available (True [G] or False [N])" ,
+                                                    font = "Calibri 9"
+                                                    )
+        self.attribute_description_label.place(x= 250, rely = 0.478)
 
 
         self.post_normal_all_button = ttk.Button(master=self.master,
@@ -197,7 +198,7 @@ class Experiment_Window(tk.Tk):
                                                     wraplength = "500")
 
 
-        self.queue_label_frame = ttk.LabelFrame(master=self.master, text="Problem-Solver Pair")
+        self.queue_label_frame = ttk.LabelFrame(master=self.master, text="Workspace")
 
         self.queue_canvas = tk.Canvas(master=self.queue_label_frame, borderwidth=0)
 
@@ -224,7 +225,9 @@ class Experiment_Window(tk.Tk):
         self.tab_one = tk.Frame(master=self.notebook)
         self.notebook.add(self.tab_one, text="Queue of Problem-Solver Pairs")
 
+        self.tab_one.configure(bg = "blue")
         self.tab_one.grid_rowconfigure(0)
+        
 
         self.heading_list = ["Selected","Exp. Num", "Problem", "Solver", "Macroreps", "", "", "", "",""]
 
@@ -283,15 +286,16 @@ class Experiment_Window(tk.Tk):
 
         self.macro_definition.place(relx=.73, rely=.05)
         self.macro_definition_label.place(relx=.7, rely=.1)
-        self.macro_definition_label.bind("<Enter>",self.on_enter)
-        self.macro_definition_label.bind("<Leave>",self.on_leave)
 
-        self.or_label.place(x=185, rely=.06)
-        self.crossdesign_button.place(x=215, rely=.06, width=235)
+        #self.macro_definition_label.bind("<Enter>",self.on_enter)
+        #self.macro_definition_label.bind("<Leave>",self.on_leave)
+
+        self.or_label.place(x=215, rely=.06)
+        self.crossdesign_button.place(x=255, rely=.06, width=210)
 
         y_place = .06
-        self.pickle_file_load_button.place(x=10, rely=y_place, width=175)
-        self.or_label2.place(x=445, rely=.06)
+        self.pickle_file_load_button.place(x=10, rely=y_place, width=195)
+        self.or_label2.place(x=470, rely=.06)
         # self.or_label22.place(x=435, rely=.06)
 
         self.queue_label_frame.place(x=10, rely=.53, relheight=.39, relwidth=.99)
@@ -313,11 +317,11 @@ class Experiment_Window(tk.Tk):
     #def on_leave(self, enter):
         #self.l2.configure(text="")
 
-    def on_enter(self, event):
-        self.macro_definition.configure(text="Definition of MacroReplication")
+    #def on_enter(self, event):
+        #self.macro_definition.configure(text="Definition of MacroReplication")
 
-    def on_leave(self, enter):
-        self.macro_definition.configure(text="")
+    #def on_leave(self, enter):
+        #self.macro_definition.configure(text="")
 
     def show_problem_factors(self, *args):
         # if args and len(args) == 2:
@@ -1451,7 +1455,7 @@ class Experiment_Window(tk.Tk):
         print("self.post_rep_function_row_index", self.post_rep_function_row_index)
 
         self.postrep_window = tk.Tk()
-        self.postrep_window.geometry("500x250")
+        self.postrep_window.geometry("600x400")
         self.postrep_window.title("Post-Processing Page")
         self.app = Post_Processing_Window(self.postrep_window, self.my_experiment, self.selected, self)
 
@@ -1489,7 +1493,7 @@ class Experiment_Window(tk.Tk):
     def crossdesign_function(self):
         # self.crossdesign_window = tk.Tk()
         self.crossdesign_window = tk.Toplevel(self.master)
-        self.crossdesign_window.geometry("350x350")
+        self.crossdesign_window.geometry("650x850")
         self.crossdesign_window.title("Cross-Design Problem-Solver Group")
         self.cross_app = Cross_Design_Window(self.crossdesign_window, self)
 
@@ -1739,7 +1743,7 @@ class Experiment_Window(tk.Tk):
         self.solver_label.destroy()
 
         self.problem_label2 = tk.Label(master=self.master, 
-                            text = "Meta Problem(s):*",
+                            text = "Group Problem(s):*",
                             font = "Calibri 13")
         self.problem_var2 = tk.StringVar(master=self.master)
         
@@ -1748,7 +1752,7 @@ class Experiment_Window(tk.Tk):
         self.problem_label2.place(relx=.35, rely=.1)
         self.problem_menu2.place(relx=.45, rely=.1)
         self.solver_label2 = tk.Label(master=self.master, 
-                            text = "Meta Solver(s):*",
+                            text = "Group Solver(s):*",
                 
                             font = "Calibri 13")
         self.solver_var2 = tk.StringVar(master=self.master)
@@ -2602,7 +2606,7 @@ class Post_Processing_Window():
         self.n_postreps_label = tk.Label(master = self.master,
                                     text = "Number of Postreplications at each Recommended Solution:",
                                     font = "Calibri 13",
-                                    wraplength = "300")
+                                    wraplength = "325")
 
         self.n_postreps_var = tk.StringVar(self.master)
         self.n_postreps_entry = ttk.Entry(master=self.master, textvariable = self.n_postreps_var, justify = tk.LEFT)
@@ -2612,7 +2616,7 @@ class Post_Processing_Window():
         self.crn_across_budget_label = tk.Label(master=self.master,
                                     text = "Use CRN for Postreplications at Solutions Recommended at Different Times?",
                                     font = "Calibri 13",
-                                    wraplength = "300")
+                                    wraplength = "325")
 
         self.crn_across_budget_list = ["True", "False"]
         # stays the same, has to change into a special type of variable via tkinter function
@@ -2625,7 +2629,7 @@ class Post_Processing_Window():
         self.crn_across_macroreps_label = tk.Label(master=self.master,
                                         text = "Use CRN for Postreplications at Solutions Recommended on Different Macroreplications?",
                                         font = "Calibri 13",
-                                        wraplength = "300")
+                                        wraplength = "325")
 
         self.crn_across_macroreps_list = ["True", "False"]
         # stays the same, has to change into a special type of variable via tkinter function
@@ -2636,7 +2640,7 @@ class Post_Processing_Window():
         self.crn_norm_budget_label = tk.Label(master=self.master,
                                     text = "Use CRN for Postreplications at x\u2080 and x\u002A?",
                                     font = "Calibri 13",
-                                    wraplength = "300")
+                                    wraplength = "325")
         self.crn_norm_across_macroreps_var = tk.StringVar(self.master)
         self.crn_norm_across_macroreps_menu = ttk.OptionMenu(self.master, self.crn_norm_across_macroreps_var, "True", *self.crn_across_macroreps_list)
 
@@ -2660,7 +2664,7 @@ class Post_Processing_Window():
         self.n_norm_postreps_entry.insert(index=tk.END, string="200")
 
         self.post_processing_run_label = tk.Label(master=self.master, # window label is used for
-                        text = "Complete Post-Processing of the Problem-Solver Pairs",
+                        text = "Complete Post-Processing of the Problem-Solver Pairs:",
                         font = "Calibri 13",
                         wraplength = "300")
 
@@ -2684,13 +2688,13 @@ class Post_Processing_Window():
             self.n_postreps_entry.place(x=300, y=55)
 
             self.crn_across_budget_label.place(x=10, y=105)
-            self.crn_across_budget_menu.place(x=300, y=105)
+            self.crn_across_budget_menu.place(x=345, y=105)
 
-            self.crn_across_macroreps_label.place(x=10, y=165)
-            self.crn_across_macroreps_menu.place(x=300, y=165)
+            self.crn_across_macroreps_label.place(x=10, y=160)
+            self.crn_across_macroreps_menu.place(x=345, y=160)
 
-            self.post_processing_run_label.place(x=10, y=221)
-            self.post_processing_run_button.place(x=300, y=215)
+            self.post_processing_run_label.place(x=10, y=233)
+            self.post_processing_run_button.place(x=310, y=237)
         else:
             self.n_proc_label.place(x=15, y=65)
 
@@ -3163,7 +3167,7 @@ class Plot_Window():
             self.param_entry = []
             self.factor_label_frame_problem = None
 
-            self.CI_label_frame = ttk.LabelFrame(master=self.master, text="Plot Parameters (Optional)")
+            self.CI_label_frame = ttk.LabelFrame(master=self.master, text="Plot Parameters")
             self.CI_canvas = tk.Canvas(master=self.CI_label_frame, borderwidth=0)
             self.CI_frame = ttk.Frame(master=self.CI_canvas)
 
@@ -3173,7 +3177,7 @@ class Plot_Window():
 
             self.CI_label_frame.place(relx=.4, rely=.15, relheight=.2, relwidth=.3)
 
-            self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings (Optional)")
+            self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings")
             self.settings_canvas = tk.Canvas(master=self.settings_label_frame, borderwidth=0)
             self.settings_frame = ttk.Frame(master=self.settings_canvas)
 
@@ -3493,7 +3497,7 @@ class Plot_Window():
                 entry1 = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry1.select()
                 # entry1 = ttk.OptionMenu(self.settings_canvas, self.params[0], "True", *tf_list)
-                label1 = tk.Label(master=self.settings_canvas, text="Confidence Intervals", font="Calibri 14")
+                label1 = tk.Label(master=self.settings_canvas, text="Show Confidence Intervals", font="Calibri 14")
                 label1.grid(row=0, column=0, padx=10, pady=3)
                 entry1.grid(row=0, column=1, padx=10, pady=3)
                 i += 1
@@ -3509,10 +3513,10 @@ class Plot_Window():
                 i += 1
             
             if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
-                # Print Max HW
+                # Show Print Max Halfwidth
                 entry2 = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry2.select()
-                label2 = tk.Label(master=self.settings_canvas, text="Print Max HW", font="Calibri 14")
+                label2 = tk.Label(master=self.settings_canvas, text="Show Max Halfwidth", font="Calibri 14")
                 label2.grid(row=2, column=0, padx=10, pady=3)
                 entry2.grid(row=2, column=1, padx=10, pady=3)
                 i += 1
