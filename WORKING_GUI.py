@@ -1918,7 +1918,7 @@ class Experiment_Window(tk.Tk):
         
 
         self.save_entry_solver.insert(index=tk.END, string=solver_name)
-
+        self.save_entry_solver["state"] = "disabled"
         self.save_label_solver.grid(row=count_factors_solver, column=0, sticky='nsew')
         self.save_entry_solver.grid(row=count_factors_solver, column=1, sticky='nsew')
 
@@ -1993,12 +1993,9 @@ class Experiment_Window(tk.Tk):
 
                 self.int_float_var_problem = tk.StringVar(self.factor_tab_one_problem)
                 self.int_float_entry_problem = ttk.Entry(master=self.factor_tab_one_problem, textvariable = self.int_float_var_problem, justify = tk.LEFT)
-                if args and len(args) == 2 and args[0] == True:
-                    self.int_float_entry_problem.insert(index=tk.END, string=str(args[1][3][0][factor_type]))
-                elif self.problem_object.specifications[factor_type].get("datatype") == tuple and len(self.problem_object.specifications[factor_type]['default']) == 1:
-                    #(factor_type, len(self.problem_object().specifications[factor_type]['default']) )
-                    # self.int_float_entry_problem.insert(index=tk.END, string=str(self.problem_object().specifications[factor_type].get("default")))
-                    self.int_float_entry_problem.insert(index=tk.END, string=str(self.problem_object.specifications[factor_type].get("default")[0]))
+                
+                if self.problem_object.specifications[factor_type].get("datatype") == tuple and len(self.problem_object.specifications[factor_type]['default']) == 1:
+                    self.int_float_entry_problem.insert(index=tk.END, string=str(self.problem_object.factors[factor_type][0]))
                 else:
                     self.int_float_entry_problem.insert(index=tk.END, string=str(self.problem_object.specifications[factor_type].get("default")))
 

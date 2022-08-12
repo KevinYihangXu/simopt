@@ -7,6 +7,7 @@ from timeit import timeit
 from functools import partial
 from tkinter.constants import FALSE, MULTIPLE, S
 import time
+from xml.dom.minidom import parseString
 from PIL import ImageTk, Image
 import traceback
 
@@ -1738,6 +1739,10 @@ class Experiment_Window(tk.Tk):
         print("self.list_meta_experiment_solvers_object", self.list_meta_experiment_solvers_object)
 
     def view_meta_function(self, row_num):
+        self.factor_label_frame_solver.destroy()
+        self.factor_label_frame_oracle.destroy()
+        self.factor_label_frame_problem.destroy()
+        
         row_index = row_num -1
         self.problem_menu.destroy()
         self.problem_label.destroy()
@@ -1782,6 +1787,18 @@ class Experiment_Window(tk.Tk):
             if i != (row_index):
                 view_button_added = self.widget_meta_list[i][7]
                 view_button_added["state"] = "disabled"
+
+        for i in range(self.count_experiment_queue):
+            self.run_button_added = self.widget_list[i][3]
+            self.run_button_added["state"] = "disabled"
+
+            self.viewEdit_button_added = self.widget_list[i][4]
+            self.viewEdit_button_added["state"] = "disabled"
+
+            self.clear_button_added = self.widget_list[i][5]
+            self.clear_button_added["state"] = "disabled"
+
+        
 
         self.pickle_file_load_button["state"] = "disabled"
         self.crossdesign_button["state"] = "disabled"
@@ -1832,6 +1849,17 @@ class Experiment_Window(tk.Tk):
             if i != (row_index):
                 view_button_added = self.widget_meta_list[i][7]
                 view_button_added["state"] = "normal"
+
+        for i in range(self.count_experiment_queue):
+            self.run_button_added = self.widget_list[i][3]
+            self.run_button_added["state"] = "normal"
+
+            self.viewEdit_button_added = self.widget_list[i][4]
+            self.viewEdit_button_added["state"] = "normal"
+
+            self.clear_button_added = self.widget_list[i][5]
+            self.clear_button_added["state"] = "normal"
+
         self.pickle_file_load_button["state"] = "normal"
         self.crossdesign_button["state"] = "normal"
         
@@ -1938,8 +1966,10 @@ class Experiment_Window(tk.Tk):
                 self.boolean_list = ["True", "False"]
                 self.boolean_var = tk.StringVar(self.factor_tab_one_solver)
 
+                print("str(self.custom_solver_object.factors[factor_type])",str(self.custom_solver_object.factors[factor_type]))
                 self.boolean_menu = ttk.OptionMenu(self.factor_tab_one_solver, self.boolean_var, str(self.custom_solver_object.factors[factor_type]), *self.boolean_list)
-
+                
+                self.boolean_menu.configure(state = "disabled")
                 self.boolean_description.grid(row=count_factors_solver, column=0, sticky='nsew')
                 self.boolean_menu.grid(row=count_factors_solver, column=1, sticky='nsew')
 
