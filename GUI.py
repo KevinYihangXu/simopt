@@ -3489,28 +3489,28 @@ class Plot_Window():
                 entry1 = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry1.select()
                 # entry1 = ttk.OptionMenu(self.settings_canvas, self.params[0], "True", *tf_list)
-                label1 = tk.Label(master=self.settings_canvas, text="Show Confidence Intervals", font="Calibri 14")
+                label1 = tk.Label(master=self.settings_canvas, text="Show Confidence Intervals", font="Calibri 13")
                 label1.grid(row=0, column=0, padx=10, pady=3)
                 entry1.grid(row=0, column=1, padx=10, pady=3)
                 i += 1
 
             if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice == "Terminal Progress Plot" or plot_choice == "Area Scatter Plot":
                 # Plot Together Checkbox
-                entry = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
+                entry = tk.Checkbutton(self.CI_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry.select()
                 # Creates the Check Mark that checks whether the plots will be plot together
-                label = tk.Label(master=self.settings_canvas, text="Plot Together", font="Calibri 14")
-                label.grid(row=1, column=0, padx=10, pady=3)
-                entry.grid(row=1, column=1, padx=10, pady=3) 
+                label = tk.Label(self.CI_canvas, text="Plot Together", font="Calibri 13")
+                label.grid(row=i, column=0, padx=10, pady=3)
+                entry.grid(row=i, column=1, padx=10, pady=3) 
                 i += 1
             
             if plot_choice == "Mean Progress Curve" or plot_choice == "Quantile Progress Curve" or plot_choice ==  "Solve time CDF" or plot_choice =="Scatter Plot" or plot_choice == "CDF Solvability" or plot_choice == "Quantile Solvability" or plot_choice == "CDF Difference Plot" or plot_choice == "Quantile Difference Plot":
                 # Show Print Max Halfwidth
                 entry2 = tk.Checkbutton(self.settings_canvas, variable=self.params[i], onvalue="True", offvalue="False")
                 entry2.select()
-                label2 = tk.Label(master=self.settings_canvas, text="Show Max Halfwidth", font="Calibri 14")
-                label2.grid(row=2, column=0, padx=10, pady=3)
-                entry2.grid(row=2, column=1, padx=10, pady=3)
+                label2 = tk.Label(master=self.settings_canvas, text="Show Max Halfwidth", font="Calibri 13")
+                label2.grid(row=1, column=0, padx=10, pady=3)
+                entry2.grid(row=1, column=1, padx=10, pady=3)
                 i += 1
             #for item in self.params:
              #   print(f"Item's value: {item.get()} at index {self.params.index(item)} in self.params list")
@@ -3518,18 +3518,18 @@ class Plot_Window():
             for param, param_val in param_list.items():
                 if param == 'normalize':
                     entry = ttk.OptionMenu(self.CI_canvas, self.params[i], "True", *tf_list)
-                    label = tk.Label(master=self.CI_canvas, text="Normalize By Relative Optimality Gap", font="Calibri 12", wraplength="200")
+                    label = tk.Label(master=self.CI_canvas, text="Normalize By Relative Optimality Gap", font="Calibri 13", wraplength="200")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'ref_solver':
-                    label = tk.Label(master=self.CI_canvas, text="Select Solver", font="Calibri 12")
+                    label = tk.Label(master=self.CI_canvas, text="Select Solver", font="Calibri 13")
                     if len(self.solvers_names) != 0:
-                        label = tk.Label(master=self.CI_canvas, text="Benchmark Solver", font="Calibri 12")
+                        label = tk.Label(master=self.CI_canvas, text="Benchmark Solver", font="Calibri 13")
                         entry = ttk.OptionMenu(self.CI_canvas, self.params[i], self.solvers_names[0], *self.solvers_names)
                         entry.grid(row=i, column=1, padx=10, pady=3)
                     label.grid(row=i, column=0, padx=10, pady=3)
                 elif param == 'solve_tol':
-                    label = tk.Label(master=self.CI_canvas, text="Optimality Gap Threshold", font="Calibri 12", wraplength="100")
+                    label = tk.Label(master=self.CI_canvas, text="Optimality Gap Threshold", font="Calibri 13", wraplength="100")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
@@ -3537,7 +3537,7 @@ class Plot_Window():
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'beta':
-                    label = tk.Label(master=self.CI_canvas, text="Quantile Probability", font="Calibri 12", wraplength="100")
+                    label = tk.Label(master=self.CI_canvas, text="Quantile Probability", font="Calibri 13", wraplength="100")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
@@ -3545,28 +3545,28 @@ class Plot_Window():
                         entry.insert(index=tk.END, string=param_val)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'plot type':
-                    label = tk.Label(master=self.CI_canvas, text="Type of Terminal Progress Plot", font="Calibri 12", wraplength="200")
+                    label = tk.Label(master=self.CI_canvas, text="Type of Terminal Progress Plot", font="Calibri 13", wraplength="200")
                     entry = ttk.OptionMenu(self.CI_canvas, self.params[i], "violin",*bp_list)
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry.grid(row=i, column=1, padx=10, pady=3)
                 elif param == 'n_bootstraps':
-                    label = tk.Label(master=self.CI_canvas, text="Number of Bootstrap Samples", font="Calibri 12", wraplength="100")
-                    label.grid(row=i, column=0, padx=10, pady=3)
-                    entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
+                    label = tk.Label(master=self.settings_canvas, text="Number of Bootstrap Samples", font="Calibri 13", wraplength="100")
+                    label.grid(row=3, column=0, padx=10, pady=3)
+                    entry = ttk.Entry(master=self.settings_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
                         entry.delete(0, 'end')
                         entry.insert(index=tk.END, string=param_val)
-                    entry.grid(row=i, column=1, padx=10, pady=3)
+                    entry.grid(row=3, column=1, padx=10, pady=3)
                 elif param == 'conf_level':
-                    label = tk.Label(master=self.CI_canvas, text="Confidence Level", font="Calibri 12", wraplength="100")
-                    label.grid(row=i, column=0, padx=10, pady=3)
-                    entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
+                    label = tk.Label(master=self.settings_canvas, text="Confidence Level", font="Calibri 13", wraplength="100")
+                    label.grid(row=2, column=0, padx=10, pady=3)
+                    entry = ttk.Entry(master=self.settings_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
                         entry.delete(0, 'end')
                         entry.insert(index=tk.END, string=param_val)
-                    entry.grid(row=i, column=1, padx=10, pady=3)
+                    entry.grid(row=2, column=1, padx=10, pady=3)
                 else:
-                    label = tk.Label(master=self.CI_canvas, text=param, font="Calibri 12")
+                    label = tk.Label(master=self.CI_canvas, text=param, font="Calibri 13")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry = ttk.Entry(master=self.CI_canvas, textvariable = self.params[i], justify = tk.LEFT)
                     if param_val is not None:
