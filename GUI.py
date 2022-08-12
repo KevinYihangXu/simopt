@@ -172,7 +172,7 @@ class Experiment_Window(tk.Tk):
                                                 command = self.load_pickle_file_function)
 
         self.attribute_description_label = tk.Label(master=self.master,
-                                                    text = "Attribute Description Label for Problems: Objective(Single [S] or Multiple [M])                                 Constraint(Unconstrained [U], Box[B], Determinisitic [D], Stochastic [S]\n                       Variable(Discrete [D], Continuous [C], Mixed [M])          Gradient Available (True [G] or False [N])" ,
+                                                    text = "Attribute Description Label for Problems: Objective(Single [S] or Multiple [M])                                 Constraint(Unconstrained [U], Box[B], Determinisitic [D], Stochastic [S])\n                      Variable(Discrete [D], Continuous [C], Mixed [M])          Gradient Available (True [G] or False [N])" ,
                                                     font = "Calibri 9"
                                                     )
         self.attribute_description_label.place(x= 250, rely = 0.478)
@@ -1730,8 +1730,6 @@ class Experiment_Window(tk.Tk):
         self.list_meta_experiment_solvers = metaExperiment.solver_names
         print("self.list_meta_experiment_solvers", self.list_meta_experiment_solvers)
 
-        
-
     def view_meta_function(self, row_num):
         self.factor_label_frame_solver.destroy()
         self.factor_label_frame_oracle.destroy()
@@ -1911,12 +1909,7 @@ class Experiment_Window(tk.Tk):
 
         count_factors_solver = 1
         for factor_type in self.default_solver_object.specifications:
-            #("size of dictionary", len(self.solver_object().specifications[factor_type]))
-            #("first", factor_type)
-            #("second", self.solver_object().specifications[factor_type].get("description"))
-            #("third", self.solver_object().specifications[factor_type].get("datatype"))
-            #("fourth", self.solver_object().specifications[factor_type].get("default"))
-
+    
             self.dictionary_size_solver = len(self.default_solver_object.specifications[factor_type])
 
             if self.default_solver_object.specifications[factor_type].get("datatype") != bool:
@@ -3459,7 +3452,7 @@ class Plot_Window():
             # self.params = [tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master), tk.StringVar(master=self.master)]
 
             self.CI_label_frame.destroy()
-            self.CI_label_frame = ttk.LabelFrame(master=self.master, text="Plot Parameters (Optional)")
+            self.CI_label_frame = ttk.LabelFrame(master=self.master, text="Plot Parameters")
             self.CI_canvas = tk.Canvas(master=self.CI_label_frame, borderwidth=0)
             self.CI_frame = ttk.Frame(master=self.CI_canvas)
 
@@ -3471,7 +3464,7 @@ class Plot_Window():
             self.CI_label_frame.place(relx=.4, rely=.15, relheight=.3, relwidth=.25)
             
             self.settings_label_frame.destroy()
-            self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings (Optional)")
+            self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings")
             self.settings_canvas = tk.Canvas(master=self.settings_label_frame, borderwidth=0)
             self.settings_frame = ttk.Frame(master=self.settings_canvas)
 
