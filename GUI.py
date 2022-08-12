@@ -1724,19 +1724,13 @@ class Experiment_Window(tk.Tk):
     def meta_experiment_problem_solver_list(self, metaExperiment):
         self.list_meta_experiment_problems = []
         self.list_meta_experiment_solvers = []
-
-        self.list_meta_experiment_problems_object = []
-        self.list_meta_experiment_solvers_object = []
         
         self.list_meta_experiment_problems = metaExperiment.problem_names
         print("self.list_meta_experiment_problems", self.list_meta_experiment_problems)
         self.list_meta_experiment_solvers = metaExperiment.solver_names
         print("self.list_meta_experiment_solvers", self.list_meta_experiment_solvers)
 
-        self.list_meta_experiment_problems_object =  metaExperiment.problems
-        print("self.list_meta_experiment_problems_object", self.list_meta_experiment_problems_object)
-        self.list_meta_experiment_solvers_object =  metaExperiment.solvers
-        print("self.list_meta_experiment_solvers_object", self.list_meta_experiment_solvers_object)
+        
 
     def view_meta_function(self, row_num):
         self.factor_label_frame_solver.destroy()
@@ -1778,17 +1772,16 @@ class Experiment_Window(tk.Tk):
         for i in range(self.count_meta_experiment_queue):
             self.clear_button_added = self.widget_meta_list[i][4]
             self.clear_button_added["state"] = "disabled"
-
-        for i in range(self.count_meta_experiment_queue):
+            
             self.run_button = self.widget_meta_list[i][3]
             self.run_button["state"] = "disabled"
 
-        for i in range(self.count_meta_experiment_queue):
             if i != (row_index):
                 view_button_added = self.widget_meta_list[i][7]
                 view_button_added["state"] = "disabled"
 
-        for i in range(self.count_experiment_queue):
+        for i in range(self.count_experiment_queue-1):
+            print("VALUE OF I",i)
             self.run_button_added = self.widget_list[i][3]
             self.run_button_added["state"] = "disabled"
 
@@ -1797,8 +1790,6 @@ class Experiment_Window(tk.Tk):
 
             self.clear_button_added = self.widget_list[i][5]
             self.clear_button_added["state"] = "disabled"
-
-        
 
         self.pickle_file_load_button["state"] = "disabled"
         self.crossdesign_button["state"] = "disabled"
@@ -1841,16 +1832,14 @@ class Experiment_Window(tk.Tk):
             self.clear_button_added = self.widget_meta_list[i][4]
             self.clear_button_added["state"] = "normal"
 
-        for i in range(self.count_meta_experiment_queue):
             self.run_button = self.widget_meta_list[i][3]
             self.run_button["state"] = "normal"
 
-        for i in range(self.count_meta_experiment_queue):
             if i != (row_index):
                 view_button_added = self.widget_meta_list[i][7]
                 view_button_added["state"] = "normal"
 
-        for i in range(self.count_experiment_queue):
+        for i in range(self.count_experiment_queue -1):
             self.run_button_added = self.widget_list[i][3]
             self.run_button_added["state"] = "normal"
 
