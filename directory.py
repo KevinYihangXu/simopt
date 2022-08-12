@@ -18,6 +18,7 @@ from solvers.astrodf import ASTRODF
 from solvers.randomsearch import RandomSearch
 from solvers.neldmd import NelderMead
 from solvers.strong import STRONG
+from solvers.spsa import SPSA
 # import models and problems
 from models.cntnv import CntNV, CntNVMaxProfit
 from models.mm1queue import MM1Queue, MM1MinMeanSojournTime
@@ -32,21 +33,24 @@ from models.chessmm import ChessMatchmaking, ChessAvgDifference
 from models.san import SAN, SANLongestPath
 from models.hotel import Hotel, HotelRevenue
 from models.tableallocation import TableAllocation, TableAllocationMaxRev
-from models.paramesti import ParameterEstimation #, ParamEstiMaxLogLik
+from models.paramesti import ParameterEstimation, ParamEstiMaxLogLik
 from models.fixedsan import FixedSAN, FixedSANLongestPath
 from models.voting import Voting, MinVotingMaxWaitTime
-from models.prodsys import ProdSys, ProdSysMinLeadTime
 from models.network import Network, NetworkMinTotalCost
 # directory dictionaries
 solver_directory = {
     "ASTRODF": ASTRODF,
     "RNDSRCH": RandomSearch,
     "NELDMD": NelderMead,
-    "STRONG": STRONG
+    "STRONG": STRONG,
+    "SPSA": SPSA
 }
 solver_nonabbreviated_directory = {
-    "ASTRODF (SDCN)": ASTRODF,
-    "Random Search (SSMN)": RandomSearch
+    "ASTRODF (SBCN)": ASTRODF,
+    "RandomSearch (SSMN)": RandomSearch,
+    "Nelder-Mead (SBCN)": NelderMead,
+    "STRONG (SBCN)": STRONG,
+    "SPSA (SBCN)": SPSA
 }
 problem_directory = {
     "CNTNEWS-1": CntNVMaxProfit,
@@ -65,10 +69,9 @@ problem_directory = {
     "SAN-1": SANLongestPath,
     "HOTEL-1": HotelRevenue,
     "TABLEALLOCATION-1": TableAllocationMaxRev,
-    #"PARAMESTI-1": ParamEstiMaxLogLik,
+    "PARAMESTI-1": ParamEstiMaxLogLik,
     "FIXEDSAN-1": FixedSANLongestPath,
     "VOTING-1": MinVotingMaxWaitTime,
-    "PRODSYS-1": ProdSysMinLeadTime,
     "NETWORK-1": NetworkMinTotalCost
 }
 problem_nonabbreviated_directory = {
@@ -87,10 +90,9 @@ problem_nonabbreviated_directory = {
     "Min Mean Longest Path for Stochastic Activity Network (SBCN)": SANLongestPath,
     "Max Revenue for Hotel Booking (SBDN)": HotelRevenue,
     "Max Revenue for Restaurant Table Allocation (SDDN)": TableAllocationMaxRev,
-    #"Max Log Likelihood for Gamma Parameter Estimation (SBCG)": ParamEstiMaxLogLik,
+    "Max Log Likelihood for Gamma Parameter Estimation (SBCG)": ParamEstiMaxLogLik,
     "Min Mean Longest Path for Fixed Stochastic Activity Network (SBCN)": FixedSANLongestPath,
     "Minimize Maximum Waiting Time for Voting System (SDDN)": MinVotingMaxWaitTime,
-    "Minimize Lead Time for Production System (SSDN)": ProdSysMinLeadTime,
     "Minimize Total Cost for Communication Networks System (SDCN)": NetworkMinTotalCost
 }
 model_directory = {
@@ -110,7 +112,6 @@ model_directory = {
     "PARAMESTI": ParameterEstimation,
     "FIXEDSAN": FixedSAN,
     "VOTING": Voting,
-    "PRODSYS": ProdSys,
     "NETWORK": Network
 }
 model_unabbreviated_directory = {
@@ -132,6 +133,5 @@ model_unabbreviated_directory = {
     "Max Log Likelihood for Gamma Parameter Estimation (SBCG)": "PARAMESTI",
     "Min Mean Longest Path for Fixed Stochastic Activity Network (SBCN)": "FIXEDSAN",
     "Minimize Maximum Waiting Time for Voting System (SDDN)": "VOTING",
-    "Minimize Lead Time for Production System (SSDN)": "PRODSYS",
     "Minimize Total Cost for Communication Networks System (SDCN)": "NETWORK"
 }
