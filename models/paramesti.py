@@ -118,7 +118,7 @@ Minimize the log likelihood of 2-D gamma random variable.
 """
 
 
-class ParamEstiMinLogLik(Problem):
+class ParamEstiMaxLogLik(Problem):
     """
     Base class to implement simulation-optimization problems.
 
