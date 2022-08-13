@@ -1591,8 +1591,6 @@ class Experiment_Window(tk.Tk):
         Plot_Window(self.postrep_window,self, experiment_list = exps, meta= True, metaList = self.my_experiment)
 
     def run_meta_function(self, integer):      
-
-
         row_index = integer - 1
         self.widget_meta_list[row_index][5]["state"] = "normal"
         self.widget_meta_list[row_index][3]["state"] = "disabled"
@@ -1605,8 +1603,10 @@ class Experiment_Window(tk.Tk):
         #(self.my_experiment.n_solvers)
         #(self.my_experiment.n_problems)
         #(self.macro_reps)
-
-        self.my_experiment.run(n_macroreps=self.macro_reps)
+        if self.macro_reps == "mixed":
+            self.my_experiment.run(n_macroreps=10)
+        else:
+            self.my_experiment.run(n_macroreps=int(self.macro_reps))
 
     def post_rep_meta_function(self, integer):
         row_index = integer - 1
@@ -1853,7 +1853,6 @@ class Experiment_Window(tk.Tk):
 
     def show_solver_factors2(self, row_index, *args):
         self.factor_label_frame_solver.destroy()
-        self.factor_label_frame_oracle.destroy()
         
         self.solver_factors_list = []
         self.solver_factors_types = []
@@ -1987,6 +1986,7 @@ class Experiment_Window(tk.Tk):
     
     def show_problem_factors2(self,row_index, *args):
         self.factor_label_frame_problem.destroy()
+        self.factor_label_frame_oracle.destroy()
         self.problem_factors_list = []
         self.problem_factors_types = []
 
