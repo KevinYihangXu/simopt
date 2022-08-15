@@ -2,7 +2,7 @@ from email.policy import default
 from os import path
 from random import expovariate
 import tkinter as tk
-from tkinter import NONE, Place, ttk, Scrollbar, filedialog
+from tkinter import NONE, Place, ttk, Scrollbar, filedialog, simpledialog
 from timeit import timeit
 from functools import partial
 from tkinter.constants import FALSE, MULTIPLE, S
@@ -254,7 +254,7 @@ class Experiment_Window(tk.Tk):
         self.tab_three = tk.Frame(master=self.notebook)
         self.notebook.add(self.tab_three, text="Post-Normalize by Problem")
         self.tab_three.grid_rowconfigure(0)
-        self.heading_list = ["Problem", "Solvers", "Select", "", "", "", "",""]
+        self.heading_list = ["Problem", "Solvers", "Selected", "", "", "", "",""]
 
         for heading in self.heading_list:
             self.tab_three.grid_columnconfigure(self.heading_list.index(heading))
@@ -1606,8 +1606,11 @@ class Experiment_Window(tk.Tk):
         #(self.my_experiment.n_solvers)
         #(self.my_experiment.n_problems)
         #(self.macro_reps)
+
+        
         if self.macro_reps == "mixed":
-            self.my_experiment.run(n_macroreps=10)
+            ask_for_macro_rep = simpledialog.askinteger("Macroreplication", "To make a Problem-Solver Group a common macroreplication is needed:")
+            self.my_experiment.run(n_macroreps=ask_for_macro_rep)
         else:
             self.my_experiment.run(n_macroreps=int(self.macro_reps))
 
@@ -1794,7 +1797,9 @@ class Experiment_Window(tk.Tk):
 
         self.pickle_file_load_button["state"] = "disabled"
         self.crossdesign_button["state"] = "disabled"
-        self.tab_one.grid_forget()
+        self.macro_entry["state"] = "disabled"
+        
+
                
 
     def exit_meta_view(self, row_num):
@@ -1852,6 +1857,7 @@ class Experiment_Window(tk.Tk):
 
         self.pickle_file_load_button["state"] = "normal"
         self.crossdesign_button["state"] = "normal"
+        self.macro_entry["state"] = "normal"
         
 
     def show_solver_factors2(self, row_index, *args):
