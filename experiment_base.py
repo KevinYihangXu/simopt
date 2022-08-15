@@ -745,31 +745,59 @@ class Experiment(object):
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
 
     def log_experiment_results(self):
+        """
+        Create .txt file with readable experiment information from its associated .pickle file
+        """
+
         # Create a new text file in experiments/logs folder with correct name.
-        name = self.file_name_path.replace("outputs", "logs")
-        with open(name + ' _experiment_results.txt', 'w') as a:
+        new_path = self.file_name_path.replace("outputs", "logs")   #  adjust file_path_name to correct folder
+        new_path2 = new_path.replace(".pickle", "")  # remove .pickle from .txt file name
+
+        with open(new_path2 + ' _experiment_results.txt', 'w') as a:
+            # Title txt file with experiment information.
             a.write(self.file_name_path)
             a.write('\n')
-            a.write(f"Solver: {base.solver.name} + \n")
-            a.write(f"Problem: {base.problem.name} + \n")
+            a.write(f"Solver: {self.solver.name} \n")
+            a.write(f"Problem: {self.problem.name} \n\n")
+
+            # Display model factors.
+            a.write(f"Model Factors:\n")
+            for key, value in self.problem.model.factors.items():
+                a.write(f"\t{key}: {value}\n")
+            a.write("\n")
+            # Display problem factors.
+            a.write(f"Problem Factors:\n")
+            for key, value in self.problem.factors.items():
+                a.write(f"\t{key}: {value}\n")
+            a.write("\n")
+            # Display solver factors.
+            a.write(f"Solver Factors:\n")
+            for key, value in self.solver.factors.items():
+                a.write(f"\t{key}: {value}\n")
+            a.write("\n")
+
+            # Display macroreplication information.
             a.write(f"{self.n_macroreps} macroreplications were run.\n")
             #If results have been postreplicated, list the number of post-replications.
             if self.check_postreplicate():
-                a.write(f"{self.n_postreps} post replications were run.\n")
+                a.write(f"{self.n_postreps} post replications were run.\n\n")
             # If post-normalized, state initial solution (x0) and proxy optimal solution (x_star)
             # and how many replications were taken of them (n_postreps_init_opt).
             if self.check_postnormalize():
-                a.write(f"The initial solution is {self.x0}.")
-                a.write(f"The proxy optimal solution is {self.x_star}")
-                a.write(repr(self.n_postreps_init_opt) + 'replications were taken')
-            a.write('Macroreplications:\n')
-            for i in self.all_recommended_xs:
-                a.write(f"\tThe recommended solution at a budget of {self.all_intermediate_budgets[i]} is{self.all_recommended_xs[i]}")
-                a.write(f"\n\t The time taken to complete this macroreplication was {self.timings[i]}.")
-                # If postreplicated, add estimated objective function values
-                if self.check_postreplicate():
-                    a.write(f"The estimated objective function value for this macroreplication is {self.all_est_objectives}.")
-            a.close()
+                a.write(f"The initial solution is {self.x0}.\n")
+                a.write(f"The proxy optimal solution is {self.xstar}.\n")
+                a.write(f"{self.n_postreps_init_opt} replications were taken.\n\n")
+            # Display recommended solution at each budget value for each macroreplication.
+            a.write('Macroreplication Results:\n')
+            for j in range(self.n_macroreps):
+                a.write(f"Macroreplication {j+1}:\n")
+                for i in range(len(self.all_intermediate_budgets[j])):
+                    a.write(f"\tAt Budget: {self.all_intermediate_budgets[j][i]}, Recommended Solution: {self.all_recommended_xs[j][i]}, ")
+                    # If postreplicated, add estimated objective function values
+                    if self.check_postreplicate():
+                        a.write(f"Estimated objective value: {self.all_est_objectives[j][i]}.\n")
+                a.write(f"\tThe time taken to complete this macroreplication was {self.timings[j]}.\n")
+        a.close()
 
 def trim_solver_results(problem, recommended_solns, intermediate_budgets):
     """Trim solutions recommended by solver after problem's max budget.
