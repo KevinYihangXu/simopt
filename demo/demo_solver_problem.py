@@ -52,12 +52,14 @@ myexperiment.post_replicate(n_postreps=200)
 # Find an optimal solution x* for normalization.
 post_normalize([myexperiment], n_postreps_init_opt=200)
 
-print("Plotting results.")
-# Produce basic plots of the solver on the problem.
-plot_progress_curves(experiments=[myexperiment], plot_type="all", normalize=False)
-plot_progress_curves(experiments=[myexperiment], plot_type="mean", normalize=False)
-plot_progress_curves(experiments=[myexperiment], plot_type="quantile", beta=0.90, normalize=False)
-plot_solvability_cdfs(experiments=[myexperiment], solve_tol=0.1)
+myexperiment.log_experiment_results()
 
-# Plots will be saved in the folder experiments/plots.
-print("Finished. Plots can be found in experiments/plots folder.")
+# print("Plotting results.")
+# # Produce basic plots of the solver on the problem.
+# plot_progress_curves(experiments=[myexperiment], plot_type="all", normalize=False)
+# plot_progress_curves(experiments=[myexperiment], plot_type="mean", normalize=False)
+# plot_progress_curves(experiments=[myexperiment], plot_type="quantile", beta=0.90, normalize=False)
+# plot_solvability_cdfs(experiments=[myexperiment], solve_tol=0.1)
+#
+# # Plots will be saved in the folder experiments/plots.
+# print("Finished. Plots can be found in experiments/plots folder.")
