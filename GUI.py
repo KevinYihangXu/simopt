@@ -201,7 +201,10 @@ class Experiment_Window(tk.Tk):
                                                     wraplength = "500")
 
 
-        self.queue_label_frame = ttk.LabelFrame(master=self.master, text="Workspace")
+        style = ttk.Style()
+        style.configure("Bold.TLabel", font = ("Calibri",15,"bold"))
+        label_Workspace = ttk.Label(text = "Workspace", style="Bold.TLabel")
+        self.queue_label_frame = ttk.LabelFrame(master=self.master, labelwidget= label_Workspace)
 
         self.queue_canvas = tk.Canvas(master=self.queue_label_frame, borderwidth=0)
 
@@ -231,7 +234,7 @@ class Experiment_Window(tk.Tk):
         self.tab_one.grid_rowconfigure(0)
         
 
-        self.heading_list = ["Selected","Exp. Num", "Problem", "Solver", "Macroreps", "", "", "", "",""]
+        self.heading_list = ["Selected","Pair #", "Problem", "Solver", "Macroreps", "", "", "", "",""]
 
         for heading in self.heading_list:
             self.tab_one.grid_columnconfigure(self.heading_list.index(heading))
@@ -262,11 +265,11 @@ class Experiment_Window(tk.Tk):
             tab = event.widget.tab('current')['text']
             if tab == 'Post-Normalize by Problem':
                 self.post_norm_setup()
-                self.post_normal_all_button.place(x=10,rely=.95)
+                self.post_normal_all_button.place(x=10,rely=.92)
             else:
                 self.post_normal_all_button.place_forget()
             if tab == 'Queue of Problem-Solver Pairs':
-                self.make_meta_experiment.place(x=10,rely=.95)
+                self.make_meta_experiment.place(x=10,rely=.92)
             else:
                 self.make_meta_experiment.place_forget()
 
@@ -1557,7 +1560,7 @@ class Experiment_Window(tk.Tk):
         self.plot_button_added.grid(row=row_num, column=6, sticky='nsew', padx=10, pady=3)
 
         self.view_button_added = ttk.Button(master=self.tab_two,
-                                            text="View Problem-Solver Groups",
+                                            text="View Problem-Solver Group",
                                             command = partial(self.view_meta_function,row_num))
         self.view_button_added.grid(row=row_num, column=7, sticky='nsew', padx=10, pady=3)
 
@@ -1761,7 +1764,7 @@ class Experiment_Window(tk.Tk):
         self.solver_menu2.place(relx=.1, rely=.1 )
 
         view_button_added = self.widget_meta_list[row_index][7]
-        view_button_added["text"] = "Exit View Meta"
+        view_button_added["text"] = "Exit View Problem-Solver Group"
         view_button_added["command"] = partial(self.exit_meta_view, row_num)
         view_button_added.grid(row= (row_num), column=7, sticky='nsew', padx=10, pady=3)
 
@@ -1822,7 +1825,7 @@ class Experiment_Window(tk.Tk):
         self.solver_menu.place(relx=.1, rely=.1 )
 
         view_button_added = self.widget_meta_list[row_index][7]
-        view_button_added["text"] = "View Problem-Solver Groups"
+        view_button_added["text"] = "View Problem-Solver Group"
         view_button_added["command"] = partial(self.view_meta_function, row_num)
         view_button_added.grid(row= (row_num), column=7, sticky='nsew', padx=10, pady=3)
 
