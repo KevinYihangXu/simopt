@@ -1389,7 +1389,7 @@ class Experiment_Window(tk.Tk):
                     self.widget_list.insert(place,self.widget_row)
                     self.check_box_list.append(self.checkbox_select)
                     self.check_box_list_var.append(self.checkbox_select_var)
-
+    
                     row_of_widgets = self.widget_list[len(self.widget_list) - 1]
                     if self.my_experiment.check_run() == True:
                         run_button = row_of_widgets[3]
@@ -3526,7 +3526,8 @@ class Plot_Window():
             
             for param, param_val in param_list.items():
                 if param == 'normalize':
-                    entry = ttk.OptionMenu(self.CI_canvas, self.params[i], "True", *tf_list)
+                    entry = tk.Checkbutton(master=self.CI_canvas, variable=self.params[i], onvalue="True", offvalue="False")
+                    entry.select()
                     label = tk.Label(master=self.CI_canvas, text="Normalize By Relative Optimality Gap", font="Calibri 13", wraplength="200")
                     label.grid(row=i, column=0, padx=10, pady=3)
                     entry.grid(row=i, column=1, padx=10, pady=3)
