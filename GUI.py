@@ -185,7 +185,7 @@ class Experiment_Window(tk.Tk):
                                                 command = self.post_normal_all_function)
 
         self.make_meta_experiment = ttk.Button(master=self.master,
-                                                text = "Create Problem-Solver Groups from Selected",
+                                                text = "Create Problem-Solver Group from Selected",
                                                 width = 35,
                                                 state = "normal",
                                                 command = self.make_meta_experiment_func) 
@@ -201,8 +201,8 @@ class Experiment_Window(tk.Tk):
                                                     wraplength = "500")
 
 
-        style = ttk.Style()
-        style.configure("Bold.TLabel", font = ("Calibri",15,"bold"))
+        self.style = ttk.Style()
+        self.style.configure("Bold.TLabel", font = ("Calibri",15,"bold"))
         label_Workspace = ttk.Label(text = "Workspace", style="Bold.TLabel")
         self.queue_label_frame = ttk.LabelFrame(master=self.master, labelwidget= label_Workspace)
 
@@ -242,7 +242,7 @@ class Experiment_Window(tk.Tk):
             label.grid(row=0, column=self.heading_list.index(heading), padx=10, pady=3)
 
         self.tab_two = tk.Frame(master=self.notebook)
-        self.notebook.add(self.tab_two, text="Queue of Problem-Solver Groups")
+        self.notebook.add(self.tab_two, text="Queue of Problem-Solver Group")
         self.tab_two.grid_rowconfigure(0)
         self.heading_list = ["Problems", "Solvers", "Macroreps", "", "", "", "",""]
 
@@ -3107,8 +3107,8 @@ class Plot_Window():
                                                     state = "normal",
                                                     command = self.plot_button)
 
-
-            self.queue_label_frame = ttk.LabelFrame(master=self.master, text="Plots")
+            
+            self.queue_label_frame = ttk.LabelFrame(master=self.master, texts= "Plots Workspace")
 
             self.queue_canvas = tk.Canvas(master=self.queue_label_frame, borderwidth=0)
 
