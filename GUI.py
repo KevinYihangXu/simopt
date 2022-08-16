@@ -1657,7 +1657,7 @@ class Experiment_Window(tk.Tk):
         for widget in self.tab_three.winfo_children():
             widget.destroy()
 
-        self.heading_list = ["Problem", "Solvers", "Select", "", "", "", "",""]
+        self.heading_list = ["Problem", "Solvers", "Selected", "", "", "", "",""]
         for heading in self.heading_list:
             self.tab_three.grid_columnconfigure(self.heading_list.index(heading))
             label = tk.Label(master=self.tab_three, text=heading, font="Calibri 14 bold")
@@ -3110,7 +3110,7 @@ class Plot_Window():
 
             self.style = ttk.Style()
             self.style.configure("Bold.TLabel", font = ("Calibri",15,"bold"))
-            Label = ttk.Label(master = self.master, text = "Workspace", style="Bold.TLabel")
+            Label = ttk.Label(master = self.master, text ="Plot Workspace", style="Bold.TLabel")
             
             self.queue_label_frame = ttk.LabelFrame(master=self.master, labelwidget = Label)
 
