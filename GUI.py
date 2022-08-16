@@ -598,7 +598,7 @@ class Experiment_Window(tk.Tk):
 
         self.solver_factors_list = []
         self.solver_factors_types = []
-
+    
         self.factor_label_frame_solver = ttk.LabelFrame(master=self.master, text="Solver Factors")
 
         self.factor_canvas_solver = tk.Canvas(master=self.factor_label_frame_solver, borderwidth=0)
@@ -3107,8 +3107,12 @@ class Plot_Window():
                                                     state = "normal",
                                                     command = self.plot_button)
 
+
+            self.style = ttk.Style()
+            self.style.configure("Bold.TLabel", font = ("Calibri",15,"bold"))
+            Label = ttk.Label(master = self.master, text = "Workspace", style="Bold.TLabel")
             
-            self.queue_label_frame = ttk.LabelFrame(master=self.master, texts= "Plots Workspace")
+            self.queue_label_frame = ttk.LabelFrame(master=self.master, labelwidget = Label)
 
             self.queue_canvas = tk.Canvas(master=self.queue_label_frame, borderwidth=0)
 
