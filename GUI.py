@@ -3168,7 +3168,7 @@ class Plot_Window():
             self.param_entry = []
             self.factor_label_frame_problem = None
 
-            self.CI_label_frame = ttk.LabelFrame(master=self.master, text="Plot Parameters")
+            self.CI_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings and Parameters")
             self.CI_canvas = tk.Canvas(master=self.CI_label_frame, borderwidth=0)
             self.CI_frame = ttk.Frame(master=self.CI_canvas)
 
@@ -3178,7 +3178,7 @@ class Plot_Window():
 
             self.CI_label_frame.place(relx=.4, rely=.15, relheight=.2, relwidth=.3)
 
-            self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings")
+            self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Error Estimation Setting and Parameters")
             self.settings_canvas = tk.Canvas(master=self.settings_label_frame, borderwidth=0)
             self.settings_frame = ttk.Frame(master=self.settings_canvas)
 
@@ -3473,7 +3473,7 @@ class Plot_Window():
             self.CI_label_frame.place(relx=.4, rely=.15, relheight=.3, relwidth=.25)
             
             self.settings_label_frame.destroy()
-            self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings")
+            self.settings_label_frame = ttk.LabelFrame(master=self.master, text="Plot Settings and Parameters")
             self.settings_canvas = tk.Canvas(master=self.settings_label_frame, borderwidth=0)
             self.settings_frame = ttk.Frame(master=self.settings_canvas)
 
