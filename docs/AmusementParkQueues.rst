@@ -8,12 +8,7 @@ each attraction according to a poisson  distribution with a rate \gamma_i=1\,
 i = 1,. . . , 7. Each attraction can only take one tourist at a time, while
 others wait in a queue. The park has enough facilities to keep C tourists
 waiting across all attractions. These facilities are to be distributed to
-create queue capacities c_1,...,c7, such that
-
-.. math::
-
-\[\sum_{i=1}^{7} c_i = C\]
-
+create queue capacities c_1,...,c7, such that the sum of these queue capacities is equivalent to the park capacity, C.
 
 If a queue is full, the tourists will immediately leave the park.
 
@@ -21,13 +16,13 @@ After visiting each attraction, a tourist leaves the park with probability 0.2.
 Otherwise, the tourist goes to another attraction according to the transition
 matrix:
 
-.. image:: Amusement_park_transition_matrix.PNG
+.. image:: Amusement1.PNG
   :alt: The transition matrix has failed to display
   :width: 800
 
 
 The time that a tourist spend at an attraction follows an Erlang
-distribution with shape parameter k = 2 and rate :math: \[\lambda\] = 9. Without loss of
+distribution with shape parameter k = 2 and rate = 1/9. Without loss of
 generality, suppose each attraction is occupied at all time. The park opens at
 9AM and closes at 5PM, and the unit of time is minute. When the park closes,
 all tourists in the queue leave immediately.
@@ -36,24 +31,15 @@ Sources of Randomness:
 ----------------------
 There are 3 sources of randomness in this model:
 
-* The arrival rate of tourists as a poisson distribution with rate of i=1,i = 1, . . . , 7.
+* The arrival rate of tourists as a poisson distribution with rate of 1 for all i, i = 1, . . . , 7.
 
 * The probability of 0.2 that a tourist leaves a park after visiting each attraction and the associated probability matrix of their next attraction otherwise.
 
 * The time spent at each attraction as an Erlang distribution
-with the shape parameter k = 2 and rate =9.
+with the shape parameter k = 2 and rate = 1/9.
 
-The probability density function of the Erlang distribution is
-
-.. math::
-
-{\displaystyle f(x;k,\lambda )={\lambda ^{k}x^{k-1}e^{-\lambda x} \over (k-1)!}\quad
- {\mbox{for }}x,\lambda \geq 0,}f(x;k,\lambda )={\lambda ^{k}x^{{k-1}}e^{{-\lambda x}}
- \over (k-1)!}\quad {\mbox{for }}x,\lambda \geq 0,
-
-The parameter k is called the shape parameter, and the parameter
- {\displaystyle \lambda }\lambda  is called the rate parameter.
-
+The Erlang distribution is the distribution of a sum of k independent exponential variables with mean 1/lambda each.
+Equivalently, it is the distribution of the time until the kth event of a Poisson process with a rate of lambda. The Erlang distribution is a special case of the gamma distribution wherein the shape of the distribution is discretised.
 
 
 Model Factors:
@@ -93,7 +79,7 @@ Model Factors:
 * transition_probabilities: The transition matrix that describes the probability of a tourist visiting each attraction after their current attraction
 
     * Default:
-    .. image:: Amusement_park_transition_matrix.PNG
+    .. image:: Amusement1.PNG
       :alt: The transition matrix has failed to display
       :width: 800
 
