@@ -1,4 +1,4 @@
-Model: Amusement Park Queues (PARK-QUEUES)
+Model: Amusement Park Queues (AMUSEMENT)
 ==========================================
 
 Description:
@@ -18,7 +18,7 @@ matrix:
 
 .. image:: Amusement1.PNG
   :alt: The transition matrix has failed to display
-  :width: 800
+  :width: 700
 
 
 The time that a tourist spend at an attraction follows an Erlang
@@ -81,7 +81,7 @@ Model Factors:
     * Default:
     .. image:: Amusement1.PNG
       :alt: The transition matrix has failed to display
-      :width: 800
+      :width: 700
 
 Responses:
 ---------
@@ -136,9 +136,7 @@ Fixed Model Factors:
 
 Starting Solution:
 ------------------
-* dv1name: dv1initialvalue
-
-* dv2name: dv2initialvalue
+* queue_capacities = [50, 50, 50, 50, 50, 50, 50]
 
 Random Solutions:
 ------------------
@@ -152,9 +150,3 @@ unknown
 Optimal Objective Function Value:
 ---------------------------------
 unknown
-
-
-Optimization Problem: <problem_name> (<problem_abbrev>)
-========================================================
-
-...
