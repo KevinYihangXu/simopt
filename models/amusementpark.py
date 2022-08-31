@@ -83,7 +83,7 @@ class AmusementPark(Model):
                 "description": "The rate parameter of the Erlang distribution for each attraction"
                                "duration.",
                 "datatype": float,
-                "default": [9.0, 9.0, 9.0, 9.0, 9.0, 9.0, 9.0]
+                "default": [1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9]
             },
             "queue_capacities": {
                 "description": "The capacity of the queue for each attraction"
@@ -210,6 +210,7 @@ class AmusementPark(Model):
         #     arr_times.append(t)
         #     t += arrival_rng.expovariate(1/sum(self.factors["arrival_gammas"]))
 
+        previous_arrival = 0
         next_arrival = arrival_rng.expovariate(sum(self.factors["arrival_gammas"]))
 
         # initialize list of attractions to be selected upon arrival.
@@ -228,9 +229,22 @@ class AmusementPark(Model):
         # Initialize quantities to track:
         total_visitors = 0
         total_departed = 0
+        # initialize time average and utilization quantities.
+        in_system = 0
+        time_average = 0
+        util_average = [0 for _ in range(self.factors["number_attractions"])]
 
         # Run simulation over time horizon.
         while min(next_arrival, min(completion_times)) < self.factors["time_open"]:
+            #count number of tourists on attractions and in queues
+            riders = 0
+            for i in range(self.factors["number_attractions"]):
+                if completion_times[i] != math.inf:
+                    riders +=1
+                    util_average[i] += (next_arrival-previous_arrival)
+            in_system = sum(queues) + riders
+            time_average += in_system*(next_arrival-previous_arrival)
+            previous_arrival = next_arrival
             if next_arrival < min(completion_times):  # next event is external tourist arrival
                 total_visitors += 1
                 # select attraction
@@ -277,8 +291,7 @@ class AmusementPark(Model):
                     if completion_times[next_destination] == math.inf:
                         # generate completion time if attraction available
                         completion_times[next_destination] = (min(completion_times) +
-                                                              time_rng.gammavariate(self.factors["erlang_shape"],
-                                                                                    self.factors["erlang_rate"]))
+                                                              time_rng.gammavariate(self.factors["erlang_shape"][finished_attraction],  self.factors["erlang_rate"][finished_attraction]))
                     # if unavailable, check if current queue is less than capacity. If queue is not full, join queue.
                     elif queues[next_destination] < self.factors["queue_capacities"][next_destination]:
                         queues[next_destination] += 1
@@ -286,13 +299,20 @@ class AmusementPark(Model):
                     else:
                         total_departed += 1
 
+        # Finish percent utilization calculation for each attraction.
+        for i in range(self.factors["number_attractions"]):
+            util_average[i] = round(util_average[i]/self.factors["time_open"], 2)
+
         # Calculate responses from simulation data.
         responses = {"total_departed": total_departed,
-                     "percent_departed": (total_departed/total_visitors)*100
+                     "percent_departed": round((total_departed/total_visitors)*100,2),
+                     "average_number_in_system": round(time_average/self.factors["time_open"],2),
+                     "attraction_utilization_percentages": util_average
                      }
         gradients = {response_key: {factor_key: np.nan for factor_key in self.specifications} for response_key in
                      responses}
-        print(total_departed)
+        # print(total_visitors)
+        # print(total_departed)
         return responses, gradients
 
 
@@ -386,7 +406,7 @@ class AmusementParkMinDepart(Problem):
             "initial_solution": {
                 "description": "Initial solution from which solvers start.",
                 "datatype": tuple,
-                "default": (50, 50, 50, 50, 50, 50, 50)
+                "default": (344, 1, 1, 1, 1, 1, 1)
             },
             "budget": {
                 "description": "Max # of replications for a solver to take.",

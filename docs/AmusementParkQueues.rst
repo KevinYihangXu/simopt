@@ -45,6 +45,14 @@ otherwise.
 * The time spent at each attraction as an Erlang distribution
 with the shape parameter k = 2 and rate =9.
 
+The probability density function of the Erlang distribution is
+
+{\displaystyle f(x;k,\lambda )={\lambda ^{k}x^{k-1}e^{-\lambda x} \over (k-1)!}\quad
+ {\mbox{for }}x,\lambda \geq 0,}f(x;k,\lambda )={\lambda ^{k}x^{{k-1}}e^{{-\lambda x}}
+ \over (k-1)!}\quad {\mbox{for }}x,\lambda \geq 0,
+The parameter k is called the shape parameter, and the parameter
+ {\displaystyle \lambda }\lambda  is called the rate parameter.
+
 
 
 Model Factors:
@@ -70,7 +78,7 @@ duration.
 * erlang_rate: The rate parameter of the Erlang distribution for each attraction
     duration.
 
-        Default: [9, 9, 9, 9, 9, 9, 9]
+        Default: [1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9]
 
 * depart_probabilities: The probability that a tourist will depart the park
 after visiting an attraction.
@@ -106,6 +114,10 @@ to full queues
 * percent_departed: The percentage of tourists to leave the park due
 to full queues
 
+* average_number_in_system: The time average of the number of tourists in the system
+
+* attraction_utilization_percentages: The percent utilizations for each attraction
+
 
 References:
 ===========
@@ -116,13 +128,12 @@ Erlang Service Times. Proceedings of the 2009 Winter Simulation Conference.
 
 
 
-Optimization Problem: Minimize Total Departed Tourists (PARK-QUEUES-1)
+Optimization Problem: Minimize Total Departed Tourists (AMUSEMENT-1)
 ========================================================
 
 Decision Variables:
 -------------------
 * queue_capacities
-
 
 
 Objectives:
@@ -133,7 +144,7 @@ Constraints:
 ------------
 * park_capacity = 350
 
-* i=17queueCapacityi=parkCapacity
+* \[\sum_{i=1}^{7} queue_capacities = park_capacity\]
 
 * queue_capacities >= 0
 
