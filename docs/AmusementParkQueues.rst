@@ -15,18 +15,9 @@ After visiting each attraction, a tourist leaves the park with probability 0.2.
 Otherwise, the tourist goes to another attraction according to the transition
 matrix:
 
-.. image:: Amusement_park_transition_matrix
+.. image:: Amusement_park_transition_matrix.PNG
   :alt: The transition matrix has failed to display
   :width: 800
-
-   1   2   3   4   5   6  7
-1 0.1 0.1 0.1 0.1 0.2 0.2 0
-2 0.1 0.1 0.1 0.1 0.2 0.2 0
-3 0.1 0.1 0.1 0.1 0.2 0.2 0
-4 0.1 0.1 0.1 0.1 0.2 0.2 0
-5 0.1 0.1 0.1 0.1 0 0.1 0.3
-6 0.1 0.1 0.1 0.1 0.1 0 0.3
-7 0.1 0.1 0.1 0.1 0.1 0.1 0.2
 
 
 The time that a tourist spend at an attraction follows an Erlang
