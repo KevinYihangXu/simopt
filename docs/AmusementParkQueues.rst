@@ -35,11 +35,10 @@ There are 3 sources of randomness in this model:
 
 * The probability of 0.2 that a tourist leaves a park after visiting each attraction and the associated probability matrix of their next attraction otherwise.
 
-* The time spent at each attraction as an Erlang distribution
-with the shape parameter k = 2 and rate = 1/9.
+* The time spent at each attraction as an Erlang distribution with the shape parameter k = 2 and rate = 1/9.
 
-The Erlang distribution is the distribution of a sum of k independent exponential variables with mean 1/lambda each.
-Equivalently, it is the distribution of the time until the kth event of a Poisson process with a rate of lambda. The Erlang distribution is a special case of the gamma distribution wherein the shape of the distribution is discretised.
+The Erlang distribution is the distribution representing a sum of k independent exponential variables with mean 1/lambda each.
+The Erlang distribution is a special case of the gamma distribution wherein the shape of the distribution is discretized.
 
 
 Model Factors:
